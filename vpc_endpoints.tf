@@ -14,3 +14,20 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   security_group_ids  = [aws_security_group.lambda_sg.id] # Use Lambda SG to allow Secrets Manager traffic
   private_dns_enabled = true                              # Enable private DNS for internal resolution
 }
+# Add SES endpoint
+resource "aws_vpc_endpoint" "ses" {
+  vpc_id            = aws_vpc.lumifi-vpc.id
+  service_name      = "com.amazonaws.${local.aws_region}.ses"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.lumifi_subnets[*].id
+  security_group_ids = [aws_security_group.lambda_sg.id]
+}
+
+# Add Glacier endpoint
+resource "aws_vpc_endpoint" "glacier" {
+  vpc_id            = aws_vpc.lumifi-vpc.id
+  service_name      = "com.amazonaws.${local.aws_region}.glacier"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.lumifi_subnets[*].id
+  security_group_ids = [aws_security_group.lambda_sg.id]
+}
