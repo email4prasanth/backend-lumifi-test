@@ -162,7 +162,7 @@ aws ec2 describe-security-group-rules `
   --output table `
   --query "SecurityGroupRules[*].{RuleID:SecurityGroupRuleId,GroupID:GroupId,Type:Type,Protocol:IpProtocol,From:FromPort,To:ToPort,CIDR:CIDR}"
 
-
+## Not working
 aws ec2 describe-security-group-rules `
   --filter Name="group-name",Values="dev-lambda-sg" `
   --query "SecurityGroupRules[?IsEgress == \`true\`]" --profile lumifitest
