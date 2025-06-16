@@ -53,7 +53,22 @@ resource "aws_iam_policy" "lambda_s3_rds_access" {
         Action   = "rds-db:connect"
         Effect   = "Allow"
         Resource = "arn:aws:rds-db:${local.aws_region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.postgres.resource_id}/dbadmin"
-      }
+      },
+      {
+      Action   = "ses:SendEmail"
+      Effect   = "Allow"
+      Resource = "*"
+    },
+    {
+      Action   = "kms:*"
+      Effect   = "Allow"
+      Resource = aws_kms_key.cmk.arn
+    },
+    {
+      Action   = "glacier:*"
+      Effect   = "Allow"
+      Resource = "*"
+    }
     ]
   })
 }
