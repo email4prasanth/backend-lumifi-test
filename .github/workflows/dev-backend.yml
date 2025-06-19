@@ -1,56 +1,108 @@
-name: Deploy Backend code AWS Infrastructure to Devevelopment Environmnet
+# name: Deploy Backend code AWS Infrastructure to Devevelopment Environmnet
+
+# on:
+#   push:
+#     branches:
+#       - develop 
+
+# jobs:
+#   aws-resources-deploy:
+#     runs-on: ubuntu-latest
+#     env:
+#       ENVIRONMENT: dev
+#       AWS_REGION: us-east-1
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Configure AWS Credentials
+#         env:
+#           AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+#         run: |
+#           echo "$AWS_CREDENTIALS" > aws_credentials.json
+#           AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
+#           AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
+          
+#           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+#           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+#           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v3
+
+#       - name: Terraform Init
+#         run: terraform init -backend-config="key=backend/$ENVIRONMENT/terraform.tfstate" -reconfigure
+
+#       - name: Select/Create Workspace
+#         run: |
+#           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+
+#       - name: Terraform Refresh
+#         run: |
+#           terraform refresh
+
+#       # - name: Terraform Validate
+#       #   run: terraform validate
+
+#       # - name: Terraform Plan
+#       #   run: terraform plan -out=tfplan
+
+#       # - name: Terraform Apply
+#       #   run: terraform apply -auto-approve tfplan
+
+# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+#       - name: Terraform Destroy
+#         run: terraform destroy -auto-approve
+
+#########################
+name: Deploy Backend code AWS Infrastructure to Development Environment
 
 on:
   push:
     branches:
-      - develop 
+      - develop
 
 jobs:
   aws-resources-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: read
     env:
       ENVIRONMENT: dev
       AWS_REGION: us-east-1
+      TF_BACKEND_KEY: "backend/$ENVIRONMENT/terraform.tfstate"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        env:
-          AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
-        run: |
-          echo "$AWS_CREDENTIALS" > aws_credentials.json
-          AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-          AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
+      # Authenticate using OIDC
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<AWS_ACCOUNT_ID>:role/<IAM_ROLE_NAME>  # Replace with your role
+          aws-region: ${{ env.AWS_REGION }}
           
-          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+      - name: Select Infrastructure path
+        uses: cd BE_IAC
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=backend/$ENVIRONMENT/terraform.tfstate" -reconfigure
+        run: terraform init -backend-config="key=${{ env.TF_BACKEND_KEY }}" -reconfigure
 
       - name: Select/Create Workspace
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      - name: Terraform Refresh
-        run: |
-          terraform refresh
+      # Uncomment below for normal deployment
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # - name: Terraform Validate
-      #   run: terraform validate
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
-
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve tfplan
-
-# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
-
+      # Remove or comment out the destroy step for normal deployments
+      # - name: Terraform Destroy
+      #   run: terraform destroy -auto-approve
