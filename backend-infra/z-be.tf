@@ -43,12 +43,12 @@
 #   }
 # }
 
-# # API Gateway mapping for Lambda1
-# resource "aws_apigatewayv2_api_mapping" "lambda1" {
-#   api_id      = aws_apigatewayv2_api.lambda1_api.id
-#   domain_name = aws_apigatewayv2_domain_name.api.id
-#   stage       = aws_apigatewayv2_stage.lambda1_stage.id
-# }
+# # # API Gateway mapping for Lambda1
+# # resource "aws_apigatewayv2_api_mapping" "lambda1" {
+# #   api_id      = aws_apigatewayv2_api.lambda1_api.id
+# #   domain_name = aws_apigatewayv2_domain_name.api.id
+# #   stage       = aws_apigatewayv2_stage.lambda1_stage.id
+# # }
 
 
 # ### File: backend.tf ###
@@ -58,190 +58,9 @@
 #     bucket  = "lumifitfstore"
 #     key     = "backend/terraform.tfstate"
 #     region  = "us-east-1"
-#     # profile = "lumifitest"
+#     profile = "lumifitest"
 #   }
 # }
-
-
-# ### File: iam.tf ###
-# # IAM Role for Lambda Execution
-# resource "aws_iam_role" "lambda_role" {
-#   name = "${local.project_name.name}-${terraform.workspace}-lambda-exec-role"
-
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Action = "sts:AssumeRole"
-#       Effect = "Allow"
-#       Principal = {
-#         Service = "lambda.amazonaws.com"
-#       }
-#     }]
-#   })
-# }
-
-# # Attach AWS Managed Policies to Lambda Role
-# resource "aws_iam_role_policy_attachment" "lambda_vpc_execution" {
-#   role       = aws_iam_role.lambda_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-# }
-# resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
-#   role       = aws_iam_role.lambda_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-# }
-# resource "aws_iam_role_policy_attachment" "lambda_s3_access" {
-#   role       = aws_iam_role.lambda_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-# }
-
-# # Custom IAM Policy for S3, RDS, Secrets Manager Access
-# resource "aws_iam_policy" "lambda_s3_rds_access" {
-#   name        = "${local.project_name.name}-${terraform.workspace}-lambda-s3-rds"
-#   description = "Access to S3 buckets and RDS"
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Action = ["s3:*", "ec2:*"]
-#         Effect = "Allow"
-#         Resource = [
-#           aws_s3_bucket.backend.arn,
-#           "${aws_s3_bucket.backend.arn}/*"
-#         ]
-#       },
-#       {
-#         Action   = "secretsmanager:GetSecretValue"
-#         Effect   = "Allow"
-#         Resource = aws_secretsmanager_secret.rds_credentials.arn
-#       },
-#       {
-#         Action   = "rds-db:connect"
-#         Effect   = "Allow"
-#         Resource = "arn:aws:rds-db:${local.aws_region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.postgres.resource_id}/dbadmin"
-#       }
-#     ]
-#   })
-# }
-# resource "aws_iam_role_policy_attachment" "lambda_s3_rds" {
-#   role       = aws_iam_role.lambda_role.name
-#   policy_arn = aws_iam_policy.lambda_s3_rds_access.arn
-# }
-
-# # Data Source: AWS Caller Identity
-# data "aws_caller_identity" "current" {}
-
-# # Custom IAM Policy for API Gateway Logging
-# resource "aws_iam_policy" "api_gateway_logging" {
-#   name        = "${local.project_name.name}-${terraform.workspace}-api-gw-logging"
-#   description = "Permissions for API Gateway to write logs"
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Action   = ["logs:*"]
-#       Effect   = "Allow"
-#       Resource = "*"
-#     }]
-#   })
-# }
-# resource "aws_iam_role_policy_attachment" "api_gw_logging" {
-#   role       = aws_iam_role.lambda_role.name
-#   policy_arn = aws_iam_policy.api_gateway_logging.arn
-# }
-
-
-# ### File: lambda-1.tf ###
-# # # Lambda Function: Data Processor
-# # resource "aws_lambda_function" "data_processor" {
-# #   function_name = "${local.project_name.name}-${terraform.workspace}-processor"
-# #   role          = aws_iam_role.lambda_role.arn
-# #   handler       = "index.handler"
-# #   runtime       = "nodejs18.x"
-# #   filename      = "lambda-1.zip"
-
-# #   vpc_config {
-# #     subnet_ids         = aws_subnet.lumifi_subnets[*].id
-# #     security_group_ids = [aws_security_group.lambda_sg.id]
-# #   }
-
-# #   environment {
-# #     variables = {
-# #       S3_BUCKET    = aws_s3_bucket.backend.bucket
-# #       ENVIRONMENT  = terraform.workspace
-# #       SERVICE_NAME = "data-processor"
-# #     }
-# #   }
-
-# #   tags = local.tags
-# # }
-
-# # # API Gateway v2 (HTTP API)
-# # resource "aws_apigatewayv2_api" "lambda1_api" {
-# #   name          = "${local.project_name.name}-${terraform.workspace}-processor-api"
-# #   protocol_type = "HTTP"
-# # }
-
-# # # API Gateway Stage
-# # resource "aws_apigatewayv2_stage" "lambda1_stage" {
-# #   api_id      = aws_apigatewayv2_api.lambda1_api.id
-# #   name        = "$default"
-# #   auto_deploy = true
-
-# #   access_log_settings {
-# #     destination_arn = aws_cloudwatch_log_group.lambda1_api_logs.arn
-# #     format = jsonencode({
-# #       requestId      = "$context.requestId"
-# #       ip             = "$context.identity.sourceIp"
-# #       requestTime    = "$context.requestTime"
-# #       httpMethod     = "$context.httpMethod"
-# #       routeKey       = "$context.routeKey"
-# #       status         = "$context.status"
-# #       responseLength = "$context.responseLength"
-# #     })
-# #   }
-# # }
-
-# # # API Gateway Integration with Lambda
-# # resource "aws_apigatewayv2_integration" "lambda1_integration" {
-# #   api_id           = aws_apigatewayv2_api.lambda1_api.id
-# #   integration_type = "AWS_PROXY"
-# #   integration_uri  = aws_lambda_function.data_processor.invoke_arn
-# # }
-
-# # # API Gateway Routes
-# # resource "aws_apigatewayv2_route" "lambda1_route" {
-# #   api_id    = aws_apigatewayv2_api.lambda1_api.id
-# #   route_key = "ANY /{proxy+}"
-# #   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
-# # }
-# # resource "aws_apigatewayv2_route" "lambda1_root" {
-# #   api_id    = aws_apigatewayv2_api.lambda1_api.id
-# #   route_key = "GET /"
-# #   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
-# # }
-
-# # # Lambda Permission for API Gateway
-# # resource "aws_lambda_permission" "lambda1_apigw" {
-# #   statement_id  = "AllowAPIGatewayInvoke"
-# #   action        = "lambda:InvokeFunction"
-# #   function_name = aws_lambda_function.data_processor.function_name
-# #   principal     = "apigateway.amazonaws.com"
-# #   source_arn    = "${aws_apigatewayv2_api.lambda1_api.execution_arn}/*/*"
-# # }
-
-# # # CloudWatch Log Groups for Lambda & API Gateway
-# # resource "aws_cloudwatch_log_group" "lambda1_logs" {
-# #   name              = "/aws/lambda/${aws_lambda_function.data_processor.function_name}"
-# #   retention_in_days = 14
-# #   tags              = local.tags
-# # }
-# # resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
-# #   name              = "/aws/api-gw/${aws_apigatewayv2_api.lambda1_api.name}"
-# #   retention_in_days = 14
-# #   tags              = local.tags
-# # }
-
 
 
 # ### File: locals.tf ###
@@ -349,6 +168,16 @@
 #     }
 #   }
 #   rds = lookup(local.db_config, terraform.workspace, local.db_config["dev"])
+
+#   ses_config = {
+#     "dev"  = { email_limit = 10000 }
+#     "prod" = { email_limit = 25000 }
+#   }
+#   glacier_config = {
+#     "dev"  = { storage_gb = 10, requests = 1000 }
+#     "prod" = { storage_gb = 100, requests = 10000 }
+#   }
+
 # }
 
 
@@ -365,56 +194,9 @@
 # # AWS Provider Configuration
 # provider "aws" {
 #   region  = local.aws_region
-#   # profile = "lumifitest"
+#   profile = "lumifitest"
 # }
 
-
-
-# ### File: rds.tf ###
-# # Random Password for RDS Admin
-# resource "random_password" "db_admin_password" {
-#   length           = 16
-#   special          = true
-#   override_special = "!$%^&*()-_=+?"
-# }
-# # RDS Subnet Group (Using Public Subnets)
-# resource "aws_db_subnet_group" "public_db" {
-#   name       = "${terraform.workspace}-lumifi-public-db-subnet-group"
-#   subnet_ids = aws_subnet.lumifi_subnets[*].id
-
-#   tags = merge(local.tags, {
-#     Name = "${terraform.workspace}-db-subnet-group"
-#   })
-# }
-
-# # PostgreSQL RDS Instance
-# resource "aws_db_instance" "postgres" {
-#   identifier        = "${terraform.workspace}-lumifi-db"
-#   allocated_storage = local.rds.allocated_storage
-#   storage_type      = "gp3"
-#   engine            = "postgres"
-#   engine_version    = "15"
-#   # Updated instance types per environment
-#   # instance_class = terraform.workspace == "prod" ? "db.t4g.medium" : "db.t3.small"
-#   instance_class = terraform.workspace == "prod" ? "db.t4g.medium" : "db.t3.micro" # For testing
-#   # Multi-AZ configuration
-#   multi_az               = terraform.workspace == "prod" ? true : false
-#   db_name                = "${terraform.workspace}_lumifi"
-#   username               = "dbadmin"
-#   password               = random_password.db_admin_password.result
-#   parameter_group_name   = "default.postgres15"
-#   skip_final_snapshot    = terraform.workspace == "dev" ? true : false
-#   vpc_security_group_ids = [aws_security_group.rds.id]
-#   db_subnet_group_name   = aws_db_subnet_group.public_db.name
-#   publicly_accessible    = true
-#   apply_immediately      = true
-#   tags                   = local.tags
-#   depends_on = [
-#     aws_internet_gateway.lumifi-igw,
-#     aws_route_table.lumifi-pub-rt,
-#     aws_security_group.lumifi_sg
-#   ]
-# }
 
 
 # ### File: route53.tf ###
@@ -441,7 +223,7 @@
 # ### File: s3.tf ###
 # # S3 Bucket - Backend Data
 # resource "aws_s3_bucket" "backend" {
-#   bucket = "${local.project_name.name}-${terraform.workspace}-backend"
+#   bucket = "${local.project_name.name}-${terraform.workspace}-backend-test"
 #   tags   = local.tags
 # }
 # resource "aws_s3_bucket_versioning" "backend" {
@@ -453,7 +235,7 @@
 
 # # S3 Bucket - Logs Storage
 # resource "aws_s3_bucket" "logs" {
-#   bucket = "${local.project_name.name}-${terraform.workspace}-logs"
+#   bucket = "${local.project_name.name}-${terraform.workspace}-logs-test"
 #   tags   = local.tags
 # }
 # resource "aws_s3_bucket_ownership_controls" "logs" {
@@ -473,26 +255,6 @@
 #   ignore_public_acls      = terraform.workspace == "prod" ? true : false
 #   restrict_public_buckets = terraform.workspace == "prod" ? true : false
 
-# }
-
-
-# ### File: secrets.tf ###
-# # Secrets Manager - RDS Credentials
-# resource "aws_secretsmanager_secret" "rds_credentials" {
-#   name        = "${terraform.workspace}-${local.project_name.name}-rds_credentials-backend-v1"
-#   description = "PostgreSQL credentials for ${terraform.workspace}"
-#   tags        = local.tags
-# }
-# resource "aws_secretsmanager_secret_version" "rds_credentials" {
-#   secret_id = aws_secretsmanager_secret.rds_credentials.id
-#   secret_string = jsonencode({
-#     username = aws_db_instance.postgres.username
-#     password = random_password.db_admin_password.result
-#     endpoint = aws_db_instance.postgres.endpoint
-#     db_name  = aws_db_instance.postgres.db_name
-#     engine   = "postgres"
-#     port     = 5432
-#   })
 # }
 
 
@@ -570,25 +332,6 @@
 #   tags = merge(local.tags, {
 #     Name = "${local.project_name.name}-lambda-sg-${terraform.workspace}"
 #   })
-# }
-
-
-# ### File: vpc_endpoints.tf ###
-# # VPC Endpoint for Amazon S3 (Gateway Type)
-# resource "aws_vpc_endpoint" "s3" {
-#   vpc_id            = aws_vpc.lumifi-vpc.id
-#   service_name      = "com.amazonaws.${local.aws_region}.s3"
-#   vpc_endpoint_type = "Gateway"
-#   route_table_ids   = [aws_route_table.lumifi-pub-rt.id]
-# }
-# # VPC Endpoint for AWS Secrets Manager (Interface Type)
-# resource "aws_vpc_endpoint" "secretsmanager" {
-#   vpc_id              = aws_vpc.lumifi-vpc.id
-#   service_name        = "com.amazonaws.${local.aws_region}.secretsmanager"
-#   vpc_endpoint_type   = "Interface"
-#   subnet_ids          = aws_subnet.lumifi_subnets[*].id   # Attach endpoint to subnets
-#   security_group_ids  = [aws_security_group.lambda_sg.id] # Use Lambda SG to allow Secrets Manager traffic
-#   private_dns_enabled = true                              # Enable private DNS for internal resolution
 # }
 
 

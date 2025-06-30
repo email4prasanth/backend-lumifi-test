@@ -111,5 +111,5 @@ locals {
     "dev"  = { storage_gb = 10, requests = 1000 }
     "prod" = { storage_gb = 100, requests = 10000 }
   }
-  
+
 }
