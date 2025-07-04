@@ -1,0 +1,20 @@
+- Security Group Tests
+```sh
+aws ec2 describe-security-groups `
+  --region us-east-1 `
+  --profile lumifitest `
+  --query "SecurityGroups[*].{GroupName:GroupName, GroupId:GroupId}" `
+  --output table
+
+# Check Lambda SG egress CIDR, From, GroupID, Protocol, RuleID, To, Type 
+aws ec2 describe-security-group-rules `
+  --region us-east-1 `
+  --profile lumifitest `
+  --output table `
+  --query "SecurityGroupRules[*].{RuleID:SecurityGroupRuleId,GroupID:GroupId,Type:Type,Protocol:IpProtocol,From:FromPort,To:ToPort,CIDR:CIDR}"
+
+## Not working
+aws ec2 describe-security-group-rules `
+  --filter Name="group-name",Values="dev-lambda-sg" `
+  --query "SecurityGroupRules[?IsEgress == \`true\`]" --profile lumifitest
+```
