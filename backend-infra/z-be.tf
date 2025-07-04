@@ -1,58 +1,5 @@
-# ### File: acm.tf ###
-# # API Gateway Certificate
-# resource "aws_acm_certificate" "api_cert" {
-#   domain_name       = "api.aitechlearn.xyz"
-#   validation_method = "DNS"
-# }
-
-# # DNS Validation for API Certificate
-# resource "aws_route53_record" "api_cert_validation" {
-#   for_each = {
-#     for dvo in aws_acm_certificate.api_cert.domain_validation_options : dvo.domain_name => {
-#       name   = dvo.resource_record_name
-#       record = dvo.resource_record_value
-#       type   = dvo.resource_record_type
-#     }
-#   }
-
-#   allow_overwrite = true
-#   name            = each.value.name
-#   records         = [each.value.record]
-#   ttl             = 60
-#   type            = each.value.type
-#   zone_id         = data.aws_route53_zone.domain.zone_id
-# }
-
-# # Certificate Validation for API
-# resource "aws_acm_certificate_validation" "api_cert" {
-#   certificate_arn         = aws_acm_certificate.api_cert.arn
-#   validation_record_fqdns = [for record in aws_route53_record.api_cert_validation : record.fqdn]
-# }
-
-
-# ### File: api_gateway.tf ###
-# # API Gateway Custom Domain
-# resource "aws_apigatewayv2_domain_name" "api" {
-#   domain_name = "api.aitechlearn.xyz"
-#   depends_on  = [aws_acm_certificate_validation.api_cert]
-
-#   domain_name_configuration {
-#     certificate_arn = aws_acm_certificate.api_cert.arn
-#     endpoint_type   = "REGIONAL"
-#     security_policy = "TLS_1_2"
-#   }
-# }
-
-# # # API Gateway mapping for Lambda1
-# # resource "aws_apigatewayv2_api_mapping" "lambda1" {
-# #   api_id      = aws_apigatewayv2_api.lambda1_api.id
-# #   domain_name = aws_apigatewayv2_domain_name.api.id
-# #   stage       = aws_apigatewayv2_stage.lambda1_stage.id
-# # }
-
-
 # ### File: backend.tf ###
-# # Terraform Remote Backend Configuration - S3 for backend code
+# # Terraform Remote Backend Configuration - S3 for backend code 
 # terraform {
 #   backend "s3" {
 #     bucket  = "lumifitfstore"
@@ -177,7 +124,26 @@
 #     "dev"  = { storage_gb = 10, requests = 1000 }
 #     "prod" = { storage_gb = 100, requests = 10000 }
 #   }
+# sender_email = "email4prasanth@gmail.com"
+# receiver_email = "reachtechprasanth@gmail.com"
+# }
 
+
+# ### File: output.tf ###
+# # outputs.tf
+# output "smtp_credentials" {
+#   value = {
+#     username = aws_iam_access_key.smtp_user.id
+#     password = aws_iam_access_key.smtp_user.ses_smtp_password_v4
+#   }
+#   sensitive = true
+# }
+
+# output "verified_emails" {
+#   value = {
+#     sender    = aws_ses_email_identity.sender.email
+#     recipient = aws_ses_email_identity.recipient.email
+#   }
 # }
 
 
@@ -197,27 +163,6 @@
 #   profile = "lumifitest"
 # }
 
-
-
-# ### File: route53.tf ###
-# # Route 53 Hosted Zone Lookup
-# data "aws_route53_zone" "domain" {
-#   name         = "aitechlearn.xyz."
-#   private_zone = false
-# }
-
-# # API Gateway Custom Domain Alias Record
-# resource "aws_route53_record" "api_gateway" {
-#   zone_id = data.aws_route53_zone.domain.zone_id
-#   name    = "api.aitechlearn.xyz"
-#   type    = "A"
-
-#   alias {
-#     name                   = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].target_domain_name
-#     zone_id                = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].hosted_zone_id
-#     evaluate_target_health = false
-#   }
-# }
 
 
 # ### File: s3.tf ###
@@ -331,6 +276,43 @@
 
 #   tags = merge(local.tags, {
 #     Name = "${local.project_name.name}-lambda-sg-${terraform.workspace}"
+#   })
+# }
+
+
+# ### File: ses.tf ###
+# # ses.tf
+# resource "aws_ses_email_identity" "sender" {
+#   email = local.sender_email
+# }
+
+# resource "aws_ses_email_identity" "recipient" {
+#   email = local.receiver_email
+# }
+
+# resource "aws_ses_configuration_set" "sandbox" {
+#   name = "${local.project_name.name}-${terraform.workspace}-ses-sandbox-config"
+# }
+
+# resource "aws_iam_user" "smtp_user" {
+#   name = "${local.project_name.name}-${terraform.workspace}-ses-smtp-user"
+# }
+
+# resource "aws_iam_access_key" "smtp_user" {
+#   user = aws_iam_user.smtp_user.name
+# }
+
+# resource "aws_iam_user_policy" "smtp_send" {
+#   name = "${local.project_name.name}-${terraform.workspace}-ses-send-policy"
+#   user = aws_iam_user.smtp_user.name
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Effect   = "Allow"
+#       Action   = "ses:SendRawEmail"
+#       Resource = "*"
+#     }]
 #   })
 # }
 
