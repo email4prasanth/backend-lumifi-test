@@ -103,14 +103,14 @@ locals {
   }
   rds = lookup(local.db_config, terraform.workspace, local.db_config["dev"])
 
-  ses_config = {
-    "dev"  = { email_limit = 10000 }
-    "prod" = { email_limit = 25000 }
-  }
-  glacier_config = {
-    "dev"  = { storage_gb = 10, requests = 1000 }
-    "prod" = { storage_gb = 100, requests = 10000 }
-  }
+  # ses_config = {
+  #   "dev"  = { email_limit = 10000 }
+  #   "prod" = { email_limit = 25000 }
+  # }
+  # glacier_config = {
+  #   "dev"  = { storage_gb = 10, requests = 1000 }
+  #   "prod" = { storage_gb = 100, requests = 10000 }
+  # }
   sender_email   = "reachtechprasanth@gmail.com"
   receiver_email = "marriprasanth.p@hubino.com"
 }

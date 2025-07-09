@@ -1,60 +1,4 @@
-# name: Deploy Backend code AWS Infrastructure to Devevelopment Environmnet
-
-# on:
-#   push:
-#     branches:
-#       - develop 
-
-# jobs:
-#   aws-resources-deploy:
-#     runs-on: ubuntu-latest
-#     env:
-#       ENVIRONMENT: dev
-#       AWS_REGION: us-east-1
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-
-#       - name: Configure AWS Credentials
-#         env:
-#           AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
-#         run: |
-#           echo "$AWS_CREDENTIALS" > aws_credentials.json
-#           AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-#           AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
-          
-#           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-#           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-#           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
-
-#       - name: Set up Terraform
-#         uses: hashicorp/setup-terraform@v3
-
-#       - name: Terraform Init
-#         run: terraform init -backend-config="key=backend/$ENVIRONMENT/terraform.tfstate" -reconfigure
-
-#       - name: Select/Create Workspace
-#         run: |
-#           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
-
-#       - name: Terraform Refresh
-#         run: |
-#           terraform refresh
-
-#       - name: Terraform Validate
-#         run: terraform validate
-
-#       - name: Terraform Plan
-#         run: terraform plan -out=tfplan
-
-#       - name: Terraform Apply
-#         run: terraform apply -auto-approve tfplan
-
-# # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-# #       - name: Terraform Destroy
-# #         run: terraform destroy -auto-approve
-
-####
+###
 name: Deploy Backend code AWS Infrastructure to Devevelopment Environmnet
 
 on:
@@ -74,6 +18,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+
+      # Create lambda zip in the expected location
+      - name: Package Lambda-1 function
+        run: |
+          cd ../services/lambda-1
+          npm install --production
+          zip -r lambda-1.zip .  # Create in current directory
+
 
       - name: Configure AWS Credentials
         env:
@@ -97,16 +50,26 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      # - name: Terraform Validate
-      #   run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
-# # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-# #       - name: Terraform Destroy
-# #         run: terraform destroy -auto-approve
+      # # 2. Install and deploy Serverless application
+      # - name: Install Serverless Framework
+      #   run: npm install -g serverless@3.38.0
+
+      # - name: Deploy Serverless Application
+      #   run: |
+      #     cd ${{ github.workspace }}
+      #     npm install
+      #     serverless deploy --stage $ENVIRONMENT
+
+# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+#       - name: Terraform Destroy
+#         run: terraform destroy -auto-approve
 
