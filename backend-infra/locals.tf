@@ -111,5 +111,6 @@ locals {
     "dev"  = { storage_gb = 10, requests = 1000 }
     "prod" = { storage_gb = 100, requests = 10000 }
   }
-  
+  sender_email   = "reachtechprasanth@gmail.com"
+  receiver_email = "marriprasanth.p@hubino.com"
 }

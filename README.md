@@ -1,21 +1,27 @@
 
 ```sh
 Test-backend-lumifi/
-├── .github/
-│   └── workflows/
-│       └── dev-backend.yml
-├── acm.tf            # API Gateway cert only
-├── api_gateway.tf
-└── backend.tf        # Separate state for backend
-├── iam.tf
-├── lambda-*.tf       # All Lambda files
-├── locals.tf         # Backend-specific locals
-├── providers.tf
-├── rds.tf
-├── route53.tf        # API Gateway DNS records
-├── s3.tf             # Backend/logs buckets
-├── secrets.tf
-├── security_groups.tf
-├── vpc_endpoints.tf
-├── vpc_subnet.tf
+└── backend-infra/
+    ├── acm.tf
+    ├── api_gateway.tf
+    ├── backend.tf
+    ├── iam.tf
+    ├── lambda1.tf             # Module declaration
+    ├── locals.tf
+    ├── output.tf
+    ├── providers.tf
+    ├── rds.tf
+    ├── route53.tf
+    ├── s3.tf
+    ├── secrets.tf
+    ├── security_groups.tf
+    ├── ses.tf
+    ├── vpc_endpoints.tf
+    ├── vpc_subnet.tf
+└── services/
+    └── lambda-1/
+        ├── variables.tf
+        ├── locals.tf
+        └── lambda-1.tf    # Lambda resources
+
 ```

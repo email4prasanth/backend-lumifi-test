@@ -51,14 +51,47 @@
 # }
 
 
+# # CloudWatch Log Group for API Gateway
+# resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
+#   name              = "/aws/api-gw/${aws_apigatewayv2_api.lambda1_api.name}"
+#   retention_in_days = 14
+#   tags              = local.tags
+# }
+
+# # Keep only ONE copy of these resources:
+# resource "aws_apigatewayv2_api" "lambda1_api" {
+#   name          = "${local.project_name.name}-${terraform.workspace}-processor-api"
+#   protocol_type = "HTTP"
+# }
+
+# resource "aws_apigatewayv2_stage" "lambda1_stage" {
+#   api_id      = aws_apigatewayv2_api.lambda1_api.id
+#   name        = "$default"
+#   auto_deploy = true
+
+#   access_log_settings {
+#     destination_arn = aws_cloudwatch_log_group.lambda1_api_logs.arn
+#     format = jsonencode({
+#       requestId      = "$context.requestId"
+#       ip             = "$context.identity.sourceIp"
+#       requestTime    = "$context.requestTime"
+#       httpMethod     = "$context.httpMethod"
+#       routeKey       = "$context.routeKey"
+#       status         = "$context.status"
+#       responseLength = "$context.responseLength"
+#     })
+#   }
+# }
+
+
 # ### File: backend.tf ###
-# # Terraform Remote Backend Configuration - S3 for backend code
+# # Terraform Remote Backend Configuration - S3 for backend code 
 # terraform {
 #   backend "s3" {
 #     bucket  = "lumifitfstore"
 #     key     = "backend/terraform.tfstate"
 #     region  = "us-east-1"
-#     # profile = "lumifitest"
+#     profile = "lumifitest"
 #   }
 # }
 
@@ -151,97 +184,18 @@
 # }
 
 
-# ### File: lambda-1.tf ###
-# # # Lambda Function: Data Processor
-# # resource "aws_lambda_function" "data_processor" {
-# #   function_name = "${local.project_name.name}-${terraform.workspace}-processor"
-# #   role          = aws_iam_role.lambda_role.arn
-# #   handler       = "index.handler"
-# #   runtime       = "nodejs18.x"
-# #   filename      = "lambda-1.zip"
+# ### File: lambda1.tf ###
+# module "lambda1" {
+#   source = "../services/lambda-1"
 
-# #   vpc_config {
-# #     subnet_ids         = aws_subnet.lumifi_subnets[*].id
-# #     security_group_ids = [aws_security_group.lambda_sg.id]
-# #   }
-
-# #   environment {
-# #     variables = {
-# #       S3_BUCKET    = aws_s3_bucket.backend.bucket
-# #       ENVIRONMENT  = terraform.workspace
-# #       SERVICE_NAME = "data-processor"
-# #     }
-# #   }
-
-# #   tags = local.tags
-# # }
-
-# # # API Gateway v2 (HTTP API)
-# # resource "aws_apigatewayv2_api" "lambda1_api" {
-# #   name          = "${local.project_name.name}-${terraform.workspace}-processor-api"
-# #   protocol_type = "HTTP"
-# # }
-
-# # # API Gateway Stage
-# # resource "aws_apigatewayv2_stage" "lambda1_stage" {
-# #   api_id      = aws_apigatewayv2_api.lambda1_api.id
-# #   name        = "$default"
-# #   auto_deploy = true
-
-# #   access_log_settings {
-# #     destination_arn = aws_cloudwatch_log_group.lambda1_api_logs.arn
-# #     format = jsonencode({
-# #       requestId      = "$context.requestId"
-# #       ip             = "$context.identity.sourceIp"
-# #       requestTime    = "$context.requestTime"
-# #       httpMethod     = "$context.httpMethod"
-# #       routeKey       = "$context.routeKey"
-# #       status         = "$context.status"
-# #       responseLength = "$context.responseLength"
-# #     })
-# #   }
-# # }
-
-# # # API Gateway Integration with Lambda
-# # resource "aws_apigatewayv2_integration" "lambda1_integration" {
-# #   api_id           = aws_apigatewayv2_api.lambda1_api.id
-# #   integration_type = "AWS_PROXY"
-# #   integration_uri  = aws_lambda_function.data_processor.invoke_arn
-# # }
-
-# # # API Gateway Routes
-# # resource "aws_apigatewayv2_route" "lambda1_route" {
-# #   api_id    = aws_apigatewayv2_api.lambda1_api.id
-# #   route_key = "ANY /{proxy+}"
-# #   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
-# # }
-# # resource "aws_apigatewayv2_route" "lambda1_root" {
-# #   api_id    = aws_apigatewayv2_api.lambda1_api.id
-# #   route_key = "GET /"
-# #   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
-# # }
-
-# # # Lambda Permission for API Gateway
-# # resource "aws_lambda_permission" "lambda1_apigw" {
-# #   statement_id  = "AllowAPIGatewayInvoke"
-# #   action        = "lambda:InvokeFunction"
-# #   function_name = aws_lambda_function.data_processor.function_name
-# #   principal     = "apigateway.amazonaws.com"
-# #   source_arn    = "${aws_apigatewayv2_api.lambda1_api.execution_arn}/*/*"
-# # }
-
-# # # CloudWatch Log Groups for Lambda & API Gateway
-# # resource "aws_cloudwatch_log_group" "lambda1_logs" {
-# #   name              = "/aws/lambda/${aws_lambda_function.data_processor.function_name}"
-# #   retention_in_days = 14
-# #   tags              = local.tags
-# # }
-# # resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
-# #   name              = "/aws/api-gw/${aws_apigatewayv2_api.lambda1_api.name}"
-# #   retention_in_days = 14
-# #   tags              = local.tags
-# # }
-
+#   # Pass required variables
+#   subnet_ids                = aws_subnet.lumifi_subnets[*].id
+#   lambda_sg_id              = aws_security_group.lambda_sg.id
+#   lambda_role_arn           = aws_iam_role.lambda_role.arn
+#   backend_bucket            = aws_s3_bucket.backend.bucket
+#   api_gateway_id            = aws_apigatewayv2_api.lambda1_api.id
+#   api_gateway_execution_arn = aws_apigatewayv2_api.lambda1_api.execution_arn
+# }
 
 
 # ### File: locals.tf ###
@@ -349,6 +303,35 @@
 #     }
 #   }
 #   rds = lookup(local.db_config, terraform.workspace, local.db_config["dev"])
+
+#   ses_config = {
+#     "dev"  = { email_limit = 10000 }
+#     "prod" = { email_limit = 25000 }
+#   }
+#   glacier_config = {
+#     "dev"  = { storage_gb = 10, requests = 1000 }
+#     "prod" = { storage_gb = 100, requests = 10000 }
+#   }
+#   sender_email   = "reachtechprasanth@gmail.com"
+#   receiver_email = "marriprasanth.p@hubino.com"
+# }
+
+
+# ### File: output.tf ###
+# # outputs.tf
+# output "smtp_credentials" {
+#   value = {
+#     username = aws_iam_access_key.smtp_user.id
+#     password = aws_iam_access_key.smtp_user.ses_smtp_password_v4
+#   }
+#   sensitive = true
+# }
+
+# output "verified_emails" {
+#   value = {
+#     sender    = aws_ses_email_identity.sender.email
+#     recipient = aws_ses_email_identity.recipient.email
+#   }
 # }
 
 
@@ -365,7 +348,7 @@
 # # AWS Provider Configuration
 # provider "aws" {
 #   region  = local.aws_region
-#   # profile = "lumifitest"
+#   profile = "lumifitest"
 # }
 
 
@@ -441,7 +424,7 @@
 # ### File: s3.tf ###
 # # S3 Bucket - Backend Data
 # resource "aws_s3_bucket" "backend" {
-#   bucket = "${local.project_name.name}-${terraform.workspace}-backend"
+#   bucket = "${local.project_name.name}-${terraform.workspace}-backend-test"
 #   tags   = local.tags
 # }
 # resource "aws_s3_bucket_versioning" "backend" {
@@ -453,7 +436,7 @@
 
 # # S3 Bucket - Logs Storage
 # resource "aws_s3_bucket" "logs" {
-#   bucket = "${local.project_name.name}-${terraform.workspace}-logs"
+#   bucket = "${local.project_name.name}-${terraform.workspace}-logs-test"
 #   tags   = local.tags
 # }
 # resource "aws_s3_bucket_ownership_controls" "logs" {
@@ -569,6 +552,43 @@
 
 #   tags = merge(local.tags, {
 #     Name = "${local.project_name.name}-lambda-sg-${terraform.workspace}"
+#   })
+# }
+
+
+# ### File: ses.tf ###
+# # ses.tf
+# resource "aws_ses_email_identity" "sender" {
+#   email = local.sender_email
+# }
+
+# resource "aws_ses_email_identity" "recipient" {
+#   email = local.receiver_email
+# }
+
+# resource "aws_ses_configuration_set" "sandbox" {
+#   name = "${local.project_name.name}-${terraform.workspace}-ses-sandbox-config"
+# }
+
+# resource "aws_iam_user" "smtp_user" {
+#   name = "${local.project_name.name}-${terraform.workspace}-ses-smtp-user"
+# }
+
+# resource "aws_iam_access_key" "smtp_user" {
+#   user = aws_iam_user.smtp_user.name
+# }
+
+# resource "aws_iam_user_policy" "smtp_send" {
+#   name = "${local.project_name.name}-${terraform.workspace}-ses-send-policy"
+#   user = aws_iam_user.smtp_user.name
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Effect   = "Allow"
+#       Action   = "ses:SendRawEmail"
+#       Resource = "*"
+#     }]
 #   })
 # }
 
