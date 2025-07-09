@@ -13,6 +13,12 @@ aws lambda invoke `
   --payload '{"test": "event"}' `
   response.json
 ```
+-  Expected output
+{
+    "StatusCode": 200,
+    "ExecutedVersion": "$LATEST"
+}
+
 ### Option-2 Use a File Instead of Inline Payload
 ```sh
 echo '{"test": "event"}' > payload.json
@@ -30,15 +36,23 @@ aws lambda invoke `
 Remove-Item .\payload.json
 ```
 
-- - Run the following command
+- Run the following command
 `aws apigatewayv2 get-apis --profile lumifitest`
 - Copy the ApiEndpoint
 ```sh
-https://t2do2br6b3.execute-api.us-east-1.amazonaws.com
+https://furhn3ptzg.execute-api.us-east-1.amazonaws.com
 ```
 
 # Test Lambda-1 endpoint
-$url1 = "https://t2do2br6b3.execute-api.us-east-1.amazonaws.com/test"
+$url1 = "https://furhn3ptzg.execute-api.us-east-1.amazonaws.com"
 Invoke-RestMethod -Uri $url1 -Method Get
+- message
+-------
+Hello from Lambda-1!
+
 Remove-Variable url1
+
+### create zip file
+Compress-Archive -Path "services\lambda-1\*" -DestinationPath "services\lambda-1\lambda-1.zip" -Force
+
 

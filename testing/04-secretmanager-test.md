@@ -12,11 +12,24 @@ aws secretsmanager get-secret-value `
    --region us-east-1
 ```
 #### output (copy endpoint and save it)
-{"db_name":"dev_lumifi","endpoint":"dev-lumifi-db.cl6kqegew8vq.ap-south-1.rds.amazonaws.com:5432","engine":"postgres","password":"hiBAP5CG9lOqhNh1","port":5432,"username":"dbadmin"}
+{"db_name":"dev_lumifi","endpoint":"dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com:5432","engine":"postgres","password":"hiBAP5CG9lOqhNh1","port":5432,"username":"dbadmin"}
 - Validate:
     - Secret exists
     - Contains expected keys (username, password, etc.)
     - IAM permissions are correct
+
+# Get RDS endpoint form Secrets > dev-lumifi-rds_credentials-backend-v1 Test connectivity
+Test-NetConnection dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com -Port 5432
+```sh
+#### output
+- Connection succeeded message
+    - ComputerName     : dev-lumifi-db.cl6kqegew8vq.ap-south-1.rds.amazonaws.com
+    - RemoteAddress    : 3.111.20.16
+    - RemotePort       : 5432
+    - InterfaceAlias   : Wi-Fi
+    - SourceAddress    : 192.168.1.3
+    - TcpTestSucceeded : True
+```
 ### Force deleting secret manager
 ```sh
 aws secretsmanager list-secrets --query 'SecretList[*].Name' --output table --profile lumifitest --region us-east-1

@@ -29,6 +29,10 @@ resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
 resource "aws_apigatewayv2_api" "lambda1_api" {
   name          = "${local.project_name.name}-${terraform.workspace}-processor-api"
   protocol_type = "HTTP"
+  cors_configuration {
+    allow_origins = ["https://www.aitechlearn.xyz"]
+    allow_methods = ["GET"]
+  }
 }
 
 resource "aws_apigatewayv2_stage" "lambda1_stage" {
@@ -48,4 +52,7 @@ resource "aws_apigatewayv2_stage" "lambda1_stage" {
       responseLength = "$context.responseLength"
     })
   }
+
 }
+
+

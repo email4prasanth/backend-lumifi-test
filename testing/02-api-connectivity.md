@@ -5,7 +5,17 @@ aws apigatewayv2 get-apis `
   --profile lumifitest `
   --query "Items[*].{Name:Name, ApiId:ApiId, ProtocolType:ProtocolType}" `
   --output table
-
+```
+- Output:
+------------------------------------------------------------
+|                          GetApis                         |
++------------+----------------------------+----------------+
+|    ApiId   |           Name             | ProtocolType   |
++------------+----------------------------+----------------+
+|  furhn3ptzg|  lumifi-dev-processor-api  |  HTTP          |
++------------+----------------------------+----------------+
+- Testing
+```sh
 aws apigatewayv2 get-apis --query "Items[?Name=='dev-lumifi-processor-api']" --profile lumifitest
 curl -I https://api.aitechlearn.xyz
 ```
