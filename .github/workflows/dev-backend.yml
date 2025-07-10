@@ -62,15 +62,15 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      # 2. Install and deploy Serverless application
-      - name: Install Serverless Framework
-        run: npm install -g serverless@3.38.0
+      # # 2. Install and deploy Serverless application
+      # - name: Install Serverless Framework
+      #   run: npm install -g serverless@3.38.0
 
-      - name: Deploy Serverless Application
-        run: |
-          cd ${{ github.workspace }}
-          npm install
-          serverless deploy --stage $ENVIRONMENT
+      # - name: Deploy Serverless Application
+      #   run: |
+      #     cd ${{ github.workspace }}
+      #     npm install
+      #     serverless deploy --stage $ENVIRONMENT
 
 # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
 #       - name: Terraform Destroy
