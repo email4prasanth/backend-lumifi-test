@@ -15,6 +15,6 @@ exports.handler = async (event) => {
             "Pragma": "no-cache",
             "Expires": "0"
         },
-        body: JSON.stringify({ message: "Testing Lumifi Dental Project third time!" }),
+        body: JSON.stringify({ message: "Testing Lumifi Dental Project!" }),
     };
 };
