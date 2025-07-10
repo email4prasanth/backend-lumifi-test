@@ -19,15 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
-      # Create lambda zip in the expected location
-      # - name: Package Lambda-1 function
-      #   run: |
-      #     cd ../services/lambda-1
-      #     # cd "$GITHUB_WORKSPACE/services/lambda-1"
-      #     npm install 
-      #     zip -r lambda-1.zip .  # Create in current directory
-
       - name: Package Lambda-1 function
         run: |
           cd "$GITHUB_WORKSPACE/services/lambda-1"
@@ -62,14 +53,14 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      - name: Terraform Validate
-        run: terraform validate
+      # - name: Terraform Validate
+      #   run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
+      # - name: Terraform Plan
+      #   run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
 
       # # 2. Install and deploy Serverless application
       # - name: Install Serverless Framework
@@ -81,7 +72,11 @@ jobs:
       #     npm install
       #     serverless deploy --stage $ENVIRONMENT
 
-# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-#       - name: Terraform Destroy
-#         run: terraform destroy -auto-approve
+# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+
+      - name: Remove secretes folder
+        run: |
+          aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
 
