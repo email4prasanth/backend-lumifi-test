@@ -3,7 +3,9 @@ resource "aws_lambda_function" "data_processor" {
   role          = var.lambda_role_arn
   handler       = "index.handler"
   runtime       = "nodejs18.x"
-  filename      = "${path.module}/lambda-1.zip"
+  # filename      = "${path.module}/lambda-1.zip"
+  filename      = "${path.root}/lambda-1.zip"
+  source_code_hash = filebase64sha256("${path.root}/lambda-1.zip") # Add this line
 
   vpc_config {
     subnet_ids         = var.subnet_ids
