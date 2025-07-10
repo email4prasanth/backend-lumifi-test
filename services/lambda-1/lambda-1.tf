@@ -5,7 +5,7 @@ resource "aws_lambda_function" "data_processor" {
   runtime       = "nodejs18.x"
   # filename      = "${path.module}/lambda-1.zip"
   filename      = "${path.root}/lambda-1.zip"
-  source_code_hash = filebase64sha256("${path.root}/lambda-1.zip") # Add this line
+  # source_code_hash = filebase64sha256("${path.root}/lambda-1.zip") # Add this line
 
   vpc_config {
     subnet_ids         = var.subnet_ids
