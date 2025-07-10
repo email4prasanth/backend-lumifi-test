@@ -23,7 +23,8 @@ jobs:
       # Create lambda zip in the expected location
       - name: Package Lambda-1 function
         run: |
-          cd ../services/lambda-1
+          # cd ../services/lambda-1
+          cd "$GITHUB_WORKSPACE/services/lambda-1"
           npm install 
           zip -r lambda-1.zip .  # Create in current directory
 
