@@ -21,12 +21,23 @@ jobs:
 
 
       # Create lambda zip in the expected location
+      # - name: Package Lambda-1 function
+      #   run: |
+      #     cd ../services/lambda-1
+      #     # cd "$GITHUB_WORKSPACE/services/lambda-1"
+      #     npm install 
+      #     zip -r lambda-1.zip .  # Create in current directory
+
       - name: Package Lambda-1 function
         run: |
-          cd ../services/lambda-1
-          # cd "$GITHUB_WORKSPACE/services/lambda-1"
+          cd "$GITHUB_WORKSPACE/services/lambda-1"
+          # Always recreate package.json if missing
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
           npm install 
-          zip -r lambda-1.zip .  # Create in current directory
+          zip -r lambda-1.zip .
+          cp lambda-1.zip "$GITHUB_WORKSPACE/backend-infra/"
 
 
       - name: Configure AWS Credentials
