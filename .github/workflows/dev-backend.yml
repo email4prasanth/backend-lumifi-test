@@ -72,7 +72,6 @@ jobs:
           npm cache clean --force
           npm install --legacy-peer-deps
           npx serverless deploy --stage $ENVIRONMENT
-          serverless deploy --stage $ENVIRONMENT
 
       # Deploy Terraform infrastructure
       - name: Package Lambda-1 function
