@@ -44,7 +44,10 @@ jobs:
       #     cache: 'npm'
 
       - name: Install Serverless Framework
-        run: npm install -g serverless@3.38.0
+        run: |
+          npm uninstall -g serverless
+          npm uninstall serverless
+          npm install -g serverless@3.38.0
 
       - name: Create env.yml
         run: |
