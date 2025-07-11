@@ -1,39 +1,3 @@
-# # CloudWatch Log Group for API Gateway
-# resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
-#   name              = "/aws/api-gw/${aws_apigatewayv2_api.lambda1_api.name}"
-#   retention_in_days = 14
-#   tags              = local.tags
-# }
-
-# # Keep only ONE copy of these resources:
-# resource "aws_apigatewayv2_api" "lambda1_api" {
-#   name          = "${local.project_name.name}-${terraform.workspace}-processor-api"
-#   protocol_type = "HTTP"
-#   cors_configuration {
-#     allow_origins = ["https://www.aitechlearn.xyz"]
-#     allow_methods = ["GET"]
-#   }
-# }
-
-# resource "aws_apigatewayv2_stage" "lambda1_stage" {
-#   api_id      = aws_apigatewayv2_api.lambda1_api.id
-#   name        = "$default"
-#   auto_deploy = true
-
-#   access_log_settings {
-#     destination_arn = aws_cloudwatch_log_group.lambda1_api_logs.arn
-#     format = jsonencode({
-#       requestId      = "$context.requestId"
-#       ip             = "$context.identity.sourceIp"
-#       requestTime    = "$context.requestTime"
-#       httpMethod     = "$context.httpMethod"
-#       routeKey       = "$context.routeKey"
-#       status         = "$context.status"
-#       responseLength = "$context.responseLength"
-#     })
-#   }
-
-# }
 # CloudWatch Log Group for API Gateway
 resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
   name              = "/aws/api-gw/${aws_apigatewayv2_api.lambda1_api.name}"
