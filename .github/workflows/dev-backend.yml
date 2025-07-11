@@ -23,11 +23,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 18
+      #     cache: 'npm'
 
       # Configure AWS credentials
       - name: Configure AWS Credentials
@@ -41,13 +41,6 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
-
-      # # Deploy Serverless application to create the Lambda
-      # - name: Setup Node.js 18
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: 18
-      #     cache: 'npm'
 
       - name: Install Serverless Framework
         run: |
