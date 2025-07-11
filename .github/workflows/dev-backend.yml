@@ -36,34 +36,34 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-      # # Deploy Serverless application to create the Lambda
-      # - name: Install Serverless Framework
-      #   run: npm install -g serverless@3.38.0
+      # Deploy Serverless application to create the Lambda
+      - name: Install Serverless Framework
+        run: npm install -g serverless@3.38.0
 
-      # - name: Create env.yml
-      #   run: |
-      #     cat <<EOF > ../env.yml
-      #     dev:
-      #       API_ROOT_PATH: "api/v1"
-      #       JWT_SECRET: "${{ secrets.JWT_SECRET }}"
-      #       DB_HOST: "${{ secrets.DB_HOST }}"
-      #       DB_USER: "postgres"
-      #       DB_PASSWORD: "${{ secrets.DB_PASSWORD }}"
-      #       DB_NAME: "${terraform.workspace}_lumifi"
-      #       DB_PORT: 5432
-      #       PG_ENCRYPT_SECRET: "${{ secrets.PG_ENCRYPT_SECRET }}"
-      #       AWS_ACCESS_KEY_ID: "${{ env.AWS_ACCESS_KEY_ID }}"
-      #       AWS_SECRET_ACCESS_KEY: "${{ env.AWS_SECRET_ACCESS_KEY }}"
-      #       AWS_REGION: "${{ env.AWS_REGION }}"
-      #       AWS_SES_SENDER_EMAIL: "reachtechprasanth@gmail.com"
-      #       FE_APP_URL: "${{ secrets.FE_APP_URL }}"
-      #     EOF
+      - name: Create env.yml
+        run: |
+          cat <<EOF > ../env.yml
+          dev:
+            API_ROOT_PATH: "api/v1"
+            JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+            DB_HOST: "${{ secrets.DB_HOST }}"
+            DB_USER: "postgres"
+            DB_PASSWORD: "${{ secrets.DB_PASSWORD }}"
+            DB_NAME: "${terraform.workspace}_lumifi"
+            DB_PORT: 5432
+            PG_ENCRYPT_SECRET: "${{ secrets.PG_ENCRYPT_SECRET }}"
+            AWS_ACCESS_KEY_ID: "${{ env.AWS_ACCESS_KEY_ID }}"
+            AWS_SECRET_ACCESS_KEY: "${{ env.AWS_SECRET_ACCESS_KEY }}"
+            AWS_REGION: "${{ env.AWS_REGION }}"
+            AWS_SES_SENDER_EMAIL: "reachtechprasanth@gmail.com"
+            FE_APP_URL: "${{ secrets.FE_APP_URL }}"
+          EOF
 
-      # - name: Deploy Serverless Application
-      #   run: |
-      #     cd ${{ github.workspace }}
-      #     npm install
-      #     serverless deploy --stage $ENVIRONMENT
+      - name: Deploy Serverless Application
+        run: |
+          cd ${{ github.workspace }}
+          npm install
+          serverless deploy --stage $ENVIRONMENT
 
       # Deploy Terraform infrastructure
       - name: Package Lambda-1 function
