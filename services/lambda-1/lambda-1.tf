@@ -32,7 +32,7 @@ resource "aws_apigatewayv2_integration" "lambda1_integration" {
 
 resource "aws_apigatewayv2_route" "lambda1_route" {
   api_id    = var.api_gateway_id
-  route_key = "ANY /{proxy+}"
+  route_key = "ANY /test"
   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
 }
 

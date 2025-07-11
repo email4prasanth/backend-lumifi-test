@@ -7,6 +7,7 @@
 // };
 
 exports.handler = async (event) => {
+    if (event.rawPath === '/test' || event.rawPath === '/test/') {
     console.log('Lambda-1 event:', JSON.stringify(event, null, 2));
     return {
         statusCode: 200,
@@ -15,6 +16,7 @@ exports.handler = async (event) => {
             "Pragma": "no-cache",
             "Expires": "0"
         },
-        body: JSON.stringify({ message: "Testing Lumifi Dental Project!" }),
+        body: JSON.stringify({ message: "Testing Lumifi Dental Project-1!" }),
     };
+};
 };
