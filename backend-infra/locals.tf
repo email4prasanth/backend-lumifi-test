@@ -113,4 +113,6 @@ locals {
   # }
   sender_email   = "reachtechprasanth@gmail.com"
   receiver_email = "marriprasanth.p@hubino.com"
+
+  api_root_path = "api/v1"
 }
