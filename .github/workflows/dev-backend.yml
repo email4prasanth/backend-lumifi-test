@@ -45,8 +45,6 @@ jobs:
 
       - name: Install Serverless Framework
         run: |
-          npm uninstall -g serverless
-          npm uninstall serverless
           npm install -g serverless@3.38.0
 
       - name: Create env.yml
