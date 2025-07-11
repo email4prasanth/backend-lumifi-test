@@ -72,7 +72,7 @@ jobs:
           npm cache clean --force
 
           # Install compatible serverless-offline version
-          npm install serverless-offline@12.0.4 --save-dev
+          npm install serverless-offline@11.3.0 --save-dev
 
           npm install --legacy-peer-deps
           npx serverless deploy --stage $ENVIRONMENT
