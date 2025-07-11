@@ -4,7 +4,9 @@
 #   role          = var.lambda_role_arn
 #   handler       = "index.handler"
 #   runtime       = "nodejs18.x"
+#   # filename      = "${path.module}/lambda-1.zip"
 #   filename      = "${path.module}/lambda-1.zip"
+#   # source_code_hash = filebase64sha256("${path.root}/lambda-1.zip") # Add this line
 
 #   vpc_config {
 #     subnet_ids         = var.subnet_ids
@@ -22,18 +24,18 @@
 #   tags = local.tags
 # }
 
-# # API Gateway Integration
-# resource "aws_apigatewayv2_integration" "lambda1_integration" {
-#   api_id           = var.api_gateway_id
-#   integration_type = "AWS_PROXY"
-#   integration_uri  = aws_lambda_function.data_processor.invoke_arn
-# }
+# # # API Gateway Integration
+# # resource "aws_apigatewayv2_integration" "lambda1_integration" {
+# #   api_id           = var.api_gateway_id
+# #   integration_type = "AWS_PROXY"
+# #   integration_uri  = aws_lambda_function.data_processor.invoke_arn
+# # }
 
-# resource "aws_apigatewayv2_route" "lambda1_route" {
-#   api_id    = var.api_gateway_id
-#   route_key = "ANY /{proxy+}"
-#   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
-# }
+# # resource "aws_apigatewayv2_route" "lambda1_route" {
+# #   api_id    = var.api_gateway_id
+# #   route_key = "ANY /{proxy+}"
+# #   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
+# # }
 
 # resource "aws_lambda_permission" "lambda1_apigw" {
 #   statement_id  = "AllowAPIGatewayInvoke"
@@ -60,6 +62,16 @@
 #     environment = terraform.workspace
 #   }
 # } 
+
+
+# ### File: outputs.tf ###
+# output "lambda_function_invoke_arn" {
+#   value = aws_lambda_function.data_processor.invoke_arn
+# }
+
+# output "lambda_function_name" {
+#   value = aws_lambda_function.data_processor.function_name
+# }
 
 
 # ### File: variables.tf ###
