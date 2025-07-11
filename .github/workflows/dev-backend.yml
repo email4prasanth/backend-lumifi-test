@@ -36,15 +36,15 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-      # Deploy Serverless application to create the Lambda
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-          
+      # # Deploy Serverless application to create the Lambda
+      # - name: Setup Node.js 18
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 18
+      #     cache: 'npm'
+
       - name: Install Serverless Framework
-        run: npm install -g serverless@3.38.0
+        run: npm install -g serverless@4
 
       - name: Create env.yml
         run: |
