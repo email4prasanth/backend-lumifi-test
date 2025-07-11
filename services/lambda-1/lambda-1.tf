@@ -36,26 +36,17 @@ resource "aws_lambda_function" "data_processor" {
 #   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
 # }
 
-exports.handler = async (event) => {
-  console.log('Received event:', JSON.stringify(event, null, 2));
-  
-  // Use event.rawPath instead of event.requestContext.http.path
-  if (event.rawPath.startsWith('/test')) {
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache, no-store, must-revalidate"
-      },
-      body: JSON.stringify({ message: "Testing Lumifi Backend!!!!!" }),
-    };
-  }
+resource "aws_lambda_permission" "lambda1_apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.data_processor.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/*"
+}
 
-  return {
-    statusCode: 404,
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ error: "Endpoint not found" }),
-  };
-};
+# CloudWatch Log Group for Lambda
+resource "aws_cloudwatch_log_group" "lambda1_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.data_processor.function_name}"
+  retention_in_days = 14
+  tags              = local.tags
+}
