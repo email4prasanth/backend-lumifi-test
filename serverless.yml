@@ -1,6 +1,6 @@
 service: serverless-express-app
 
-frameworkVersion: '>=4.0.0'
+frameworkVersion: '>=3.0.0'
 
 custom:
   serverless-offline:
