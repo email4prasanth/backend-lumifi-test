@@ -70,6 +70,10 @@ jobs:
         run: |
           cd ${{ github.workspace }}
           npm cache clean --force
+
+          # Install compatible serverless-offline version
+          npm install serverless-offline@11.7.0 --save-dev
+
           npm install --legacy-peer-deps
           npx serverless deploy --stage $ENVIRONMENT
 
