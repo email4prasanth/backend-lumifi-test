@@ -91,18 +91,26 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      - name: Terraform Validate
-        run: terraform validate
+      # - name: Terraform Validate
+      #   run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
+      # - name: Terraform Plan
+      #   run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
 
-      # Cleanup Serverless API Gateway
-      - name: Remove Serverless API Gateway
+      # # Cleanup Serverless API Gateway
+      # - name: Remove Serverless API Gateway
+      #   run: |
+      #     API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='$ENVIRONMENT-serverless-express-app'].ApiId" --output text)
+      #     [ -z "$API_ID" ] || aws apigatewayv2 delete-api --api-id $API_ID
+      #   continue-on-error: true
+
+# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+
+      - name: Remove secretes folder
         run: |
-          API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='$ENVIRONMENT-serverless-express-app'].ApiId" --output text)
-          [ -z "$API_ID" ] || aws apigatewayv2 delete-api --api-id $API_ID
-        continue-on-error: true
+          aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
