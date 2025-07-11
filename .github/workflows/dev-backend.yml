@@ -37,6 +37,12 @@ jobs:
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
       # Deploy Serverless application to create the Lambda
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
       - name: Install Serverless Framework
         run: npm install -g serverless@3.38.0
 
@@ -62,7 +68,9 @@ jobs:
       - name: Deploy Serverless Application
         run: |
           cd ${{ github.workspace }}
-          npm install
+          npm cache clean --force
+          npm install --legacy-peer-deps
+          npx serverless deploy --stage $ENVIRONMENT
           serverless deploy --stage $ENVIRONMENT
 
       # Deploy Terraform infrastructure
