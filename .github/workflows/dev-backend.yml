@@ -1,14 +1,10 @@
-# 
-name: Deploy lumifi backend Infrastructure to devevelopment environmnet
+###
+name: Deploy Backend code AWS Infrastructure to Devevelopment Environmnet
 
 on:
   push:
     branches:
       - develop 
-      
-permissions:
-  contents: read
-  id-token: write
 
 jobs:
   aws-resources-deploy:
@@ -23,13 +19,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Setup Node.js
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: 18
-      #     cache: 'npm'
+      - name: Package Lambda-1 function
+        run: |
+          cd "$GITHUB_WORKSPACE/services/lambda-1"
+          # Always recreate package.json if missing
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+          npm install 
+          zip -r lambda-1.zip .
+          cp lambda-1.zip "$GITHUB_WORKSPACE/backend-infra/"
 
-      # Configure AWS credentials
+
       - name: Configure AWS Credentials
         env:
           AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
@@ -42,45 +43,6 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-      # - name: Install Serverless Framework
-      #   run: |
-      #     npm ci --legacy-peer-deps
-      #     npm install serverless@3.38.0 --save-dev
-      #     npm install serverless-offline@8.8.1 --save-dev|
-
-      # - name: Create env.yml
-      #   run: |
-      #     cat <<EOF > ../env.yml
-      #     dev:
-      #       API_ROOT_PATH: "api/v1"
-      #       JWT_SECRET: "${{ secrets.JWT_SECRET }}"
-      #       DB_HOST: "${{ secrets.DB_HOST }}"
-      #       DB_USER: "postgres"
-      #       DB_PASSWORD: "${{ secrets.DB_PASSWORD }}"
-      #       DB_NAME: "${ENVIRONMENT}_lumifi"
-      #       DB_PORT: 5432
-      #       PG_ENCRYPT_SECRET: "${{ secrets.PG_ENCRYPT_SECRET }}"
-      #       AWS_ACCESS_KEY_ID: "${{ env.AWS_ACCESS_KEY_ID }}"
-      #       AWS_SECRET_ACCESS_KEY: "${{ env.AWS_SECRET_ACCESS_KEY }}"
-      #       AWS_REGION: "${{ env.AWS_REGION }}"
-      #       AWS_SES_SENDER_EMAIL: "reachtechprasanth@gmail.com"
-      #       FE_APP_URL: "${{ secrets.FE_APP_URL }}"
-      #     EOF
-
-      # - name: Deploy Serverless Application
-      #   run: |
-      #     cd ${{ github.workspace }}
-      #     npm cache clean --force
-      #     npx serverless deploy --stage $ENVIRONMENT
-
-      # Deploy Terraform infrastructure
-      - name: Package Lambda-1 function
-        run: |
-          cd ../services/lambda-1
-          npm install --production
-          zip -r lambda-1.zip .  # Create in current directory
-
-      # Deploy Terraform infrastructure
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -91,26 +53,30 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      # - name: Terraform Validate
-      #   run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
-      # # Cleanup Serverless API Gateway
-      # - name: Remove Serverless API Gateway
-      #   run: |
-      #     API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='$ENVIRONMENT-serverless-express-app'].ApiId" --output text)
-      #     [ -z "$API_ID" ] || aws apigatewayv2 delete-api --api-id $API_ID
-      #   continue-on-error: true
+      # # # 2. Install and deploy Serverless application
+      # # - name: Install Serverless Framework
+      # #   run: npm install -g serverless@3.38.0
 
-# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+      # # - name: Deploy Serverless Application
+      # #   run: |
+      # #     cd ${{ github.workspace }}
+      # #     npm install
+      # #     serverless deploy --stage $ENVIRONMENT
 
-      - name: Remove secretes folder
-        run: |
-          aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
+# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+#       - name: Terraform Destroy
+#         run: terraform destroy -auto-approve
+
+#       - name: Remove secretes folder
+#         run: |
+#           aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
+
