@@ -36,11 +36,11 @@ resource "aws_apigatewayv2_route" "lambda1_test" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
 }
 
-resource "aws_apigatewayv2_route" "lambda1_test_slash" {
-  api_id    = aws_apigatewayv2_api.lambda1_api.id
-  route_key = "ANY /test/{proxy+}"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
-}
+# resource "aws_apigatewayv2_route" "lambda1_test_slash" {
+#   api_id    = aws_apigatewayv2_api.lambda1_api.id
+#   route_key = "ANY /test/{proxy+}"
+#   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
+# }
 
 resource "aws_apigatewayv2_integration" "lambda1_integration" {
   api_id           = aws_apigatewayv2_api.lambda1_api.id
@@ -48,4 +48,9 @@ resource "aws_apigatewayv2_integration" "lambda1_integration" {
   integration_uri  = module.lambda1.lambda_function_invoke_arn
 }
 
+resource "aws_apigatewayv2_route" "lambda1_root" {
+  api_id    = aws_apigatewayv2_api.lambda1_api.id
+  route_key = "ANY /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
+}
 
