@@ -1,6 +1,7 @@
 {
   "name": "serverless-api",
   "version": "1.0.0",
+  "type": "commonjs", 
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/app.ts",
@@ -22,7 +23,7 @@
     "@aws-sdk/client-ses": "^3.840.0",
     "@types/jest": "^29.5.14",
     "aws-lambda": "^1.0.7",
-    "bcrypt": "^6.0.0",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
     "otplib": "^12.0.1",
@@ -51,7 +52,7 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "serverless": "^3.38.0",
-    "serverless-offline": "^13.3.3",
+    "serverless-offline": "^8.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

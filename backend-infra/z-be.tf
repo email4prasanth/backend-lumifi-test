@@ -1,56 +1,73 @@
-# ### File: acm.tf ###
-# # API Gateway Certificate
-# resource "aws_acm_certificate" "api_cert" {
-#   domain_name       = "api.aitechlearn.xyz"
-#   validation_method = "DNS"
+# ### File: api_gateway_serverless.tf ###
+
+# # CloudWatch Log Group for Serverless API Gateway
+# resource "aws_cloudwatch_log_group" "serverless_api_logs" {
+#   name              = "/aws/api-gw/${aws_apigatewayv2_api.serverless_api.name}"
+#   retention_in_days = 14
+#   tags              = local.tags
 # }
 
-# # DNS Validation for API Certificate
-# resource "aws_route53_record" "api_cert_validation" {
-#   for_each = {
-#     for dvo in aws_acm_certificate.api_cert.domain_validation_options : dvo.domain_name => {
-#       name   = dvo.resource_record_name
-#       record = dvo.resource_record_value
-#       type   = dvo.resource_record_type
-#     }
+
+# # API Gateway for Serverless Service
+# resource "aws_apigatewayv2_api" "serverless_api" {
+#   name          = "${local.project_name.name}-${terraform.workspace}-serverless-api"
+#   protocol_type = "HTTP"
+#   tags          = local.tags
+# }
+
+# resource "aws_apigatewayv2_stage" "serverless_stage" {
+#   api_id      = aws_apigatewayv2_api.serverless_api.id
+#   name        = "$default"
+#   auto_deploy = true
+
+#   access_log_settings {
+#     destination_arn = aws_cloudwatch_log_group.serverless_api_logs.arn
+#     format = jsonencode({
+#       requestId      = "$context.requestId"
+#       ip             = "$context.identity.sourceIp"
+#       requestTime    = "$context.requestTime"
+#       httpMethod     = "$context.httpMethod"
+#       routeKey       = "$context.routeKey"
+#       status         = "$context.status"
+#       responseLength = "$context.responseLength"
+#     })
 #   }
-
-#   allow_overwrite = true
-#   name            = each.value.name
-#   records         = [each.value.record]
-#   ttl             = 60
-#   type            = each.value.type
-#   zone_id         = data.aws_route53_zone.domain.zone_id
+#   tags = local.tags
 # }
 
-# # Certificate Validation for API
-# resource "aws_acm_certificate_validation" "api_cert" {
-#   certificate_arn         = aws_acm_certificate.api_cert.arn
-#   validation_record_fqdns = [for record in aws_route53_record.api_cert_validation : record.fqdn]
+# # API Gateway Integration
+# resource "aws_apigatewayv2_integration" "serverless_integration" {
+#   api_id = aws_apigatewayv2_api.serverless_api.id
+#   # integration_type = "HTTP_PROXY"
+#   integration_type = "AWS_PROXY"
+#   integration_uri  = data.aws_lambda_function.serverless_lambda.invoke_arn # Point to your serverless Lambda
+#   # integration_method     = "ANY"
+#   payload_format_version = "1.0"
+#   # payload_format_version = "2.0"
+# }
+
+# # API Gateway Routes
+# resource "aws_apigatewayv2_route" "api_v1_route" {
+#   api_id    = aws_apigatewayv2_api.serverless_api.id
+#   route_key = "ANY /${local.api_root_path}/{proxy+}"
+#   target    = "integrations/${aws_apigatewayv2_integration.serverless_integration.id}"
+# }
+
+# resource "aws_apigatewayv2_route" "root_route" {
+#   api_id    = aws_apigatewayv2_api.serverless_api.id
+#   route_key = "ANY /{proxy+}"
+#   # route_key = "$default"
+#   target = "integrations/${aws_apigatewayv2_integration.serverless_integration.id}"
+# }
+
+# resource "aws_apigatewayv2_route" "catchall_route" {
+#   api_id    = aws_apigatewayv2_api.serverless_api.id
+#   route_key = "$default"
+#   target    = "integrations/${aws_apigatewayv2_integration.serverless_integration.id}"
 # }
 
 
 # ### File: api_gateway.tf ###
-# # API Gateway Custom Domain
-# resource "aws_apigatewayv2_domain_name" "api" {
-#   domain_name = "api.aitechlearn.xyz"
-#   depends_on  = [aws_acm_certificate_validation.api_cert]
-
-#   domain_name_configuration {
-#     certificate_arn = aws_acm_certificate.api_cert.arn
-#     endpoint_type   = "REGIONAL"
-#     security_policy = "TLS_1_2"
-#   }
-# }
-
-# # API Gateway mapping for Lambda1
-# resource "aws_apigatewayv2_api_mapping" "lambda1" {
-#   api_id      = aws_apigatewayv2_api.lambda1_api.id
-#   domain_name = aws_apigatewayv2_domain_name.api.id
-#   stage       = aws_apigatewayv2_stage.lambda1_stage.id
-# }
-
-
 # # CloudWatch Log Group for API Gateway
 # resource "aws_cloudwatch_log_group" "lambda1_api_logs" {
 #   name              = "/aws/api-gw/${aws_apigatewayv2_api.lambda1_api.name}"
@@ -62,10 +79,6 @@
 # resource "aws_apigatewayv2_api" "lambda1_api" {
 #   name          = "${local.project_name.name}-${terraform.workspace}-processor-api"
 #   protocol_type = "HTTP"
-#   cors_configuration {
-#     allow_origins = ["https://www.aitechlearn.xyz"]
-#     allow_methods = ["GET"]
-#   }
 # }
 
 # resource "aws_apigatewayv2_stage" "lambda1_stage" {
@@ -85,7 +98,24 @@
 #       responseLength = "$context.responseLength"
 #     })
 #   }
+# }
 
+# resource "aws_apigatewayv2_route" "lambda1_test" {
+#   api_id    = aws_apigatewayv2_api.lambda1_api.id
+#   route_key = "ANY /test"
+#   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
+# }
+
+# resource "aws_apigatewayv2_route" "lambda1_test_slash" {
+#   api_id    = aws_apigatewayv2_api.lambda1_api.id
+#   route_key = "ANY /test/{proxy+}"
+#   target    = "integrations/${aws_apigatewayv2_integration.lambda1_integration.id}"
+# }
+
+# resource "aws_apigatewayv2_integration" "lambda1_integration" {
+#   api_id           = aws_apigatewayv2_api.lambda1_api.id
+#   integration_type = "AWS_PROXY"
+#   integration_uri  = module.lambda1.lambda_function_invoke_arn
 # }
 
 
@@ -321,6 +351,8 @@
 #   # }
 #   sender_email   = "reachtechprasanth@gmail.com"
 #   receiver_email = "marriprasanth.p@hubino.com"
+
+#   api_root_path = "api/v1"
 # }
 
 
@@ -340,6 +372,11 @@
 #     recipient = aws_ses_email_identity.recipient.email
 #   }
 # }
+
+# output "api_endpoint" {
+#   value = aws_apigatewayv2_api.lambda1_api.api_endpoint
+# }
+
 
 
 # ### File: providers.tf ###
@@ -404,27 +441,6 @@
 #     aws_route_table.lumifi-pub-rt,
 #     aws_security_group.lumifi_sg
 #   ]
-# }
-
-
-# ### File: route53.tf ###
-# # Route 53 Hosted Zone Lookup
-# data "aws_route53_zone" "domain" {
-#   name         = "aitechlearn.xyz."
-#   private_zone = false
-# }
-
-# # API Gateway Custom Domain Alias Record
-# resource "aws_route53_record" "api_gateway" {
-#   zone_id = data.aws_route53_zone.domain.zone_id
-#   name    = "api.aitechlearn.xyz"
-#   type    = "A"
-
-#   alias {
-#     name                   = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].target_domain_name
-#     zone_id                = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].hosted_zone_id
-#     evaluate_target_health = false
-#   }
 # }
 
 
@@ -560,6 +576,20 @@
 #   tags = merge(local.tags, {
 #     Name = "${local.project_name.name}-lambda-sg-${terraform.workspace}"
 #   })
+# }
+
+
+# ### File: serverlessLambda.tf ###
+# data "aws_lambda_function" "serverless_lambda" {
+#   function_name = "${terraform.workspace}-serverless-lambda" # Match your serverless deploy name
+# }
+
+# resource "aws_lambda_permission" "serverless_apigw" {
+#   statement_id  = "AllowServerlessAPIGatewayInvoke"
+#   action        = "lambda:InvokeFunction"
+#   function_name = data.aws_lambda_function.serverless_lambda.function_name
+#   principal     = "apigateway.amazonaws.com"
+#   source_arn    = "${aws_apigatewayv2_api.serverless_api.execution_arn}/*/*"
 # }
 
 
