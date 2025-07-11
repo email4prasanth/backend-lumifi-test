@@ -14,17 +14,25 @@
 
 
 exports.handler = async (event) => {
-  // For any request to /test, return success
-  if (event.requestContext.http.path.startsWith('/test')) {
+  console.log('Received event:', JSON.stringify(event, null, 2));
+  
+  // Use event.rawPath instead of event.requestContext.http.path
+  if (event.rawPath.startsWith('/test')) {
     return {
       statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      },
       body: JSON.stringify({ message: "Testing Lumifi Backend!!!!!" }),
     };
   }
-  
-  // Default 404 response
+
   return {
     statusCode: 404,
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ error: "Endpoint not found" }),
   };
 };
