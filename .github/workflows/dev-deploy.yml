@@ -71,11 +71,6 @@ jobs:
         run: terraform output -json > outputs.json
         if: always()
 
-      - name: Upload Terraform Outputs
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform-outputs
-          path: backend-infra/outputs.json
 
 # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
 #       - name: Terraform Destroy
