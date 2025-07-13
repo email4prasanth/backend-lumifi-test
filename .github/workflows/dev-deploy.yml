@@ -130,7 +130,7 @@ jobs:
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           
           # Deploy with license key
-          sls deploy --stage $ENVIRONMENT --no-apigateway
+          sls deploy --stage $ENVIRONMENT
 
       # - name: Get Serverless Endpoint
       #   id: sls-info
