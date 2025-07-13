@@ -118,7 +118,7 @@ jobs:
             PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
             AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
             FE_APP_URL: ${{ secrets.FE_APP_URL }}
-            API_ROOT_PATH: ${{ secrets.API_ROOT_PATH }}
+            API_ROOT_PATH: ${{ API_ROOT_PATH }}
             # AWS_ACCESS_KEY_ID : ${{secrets.AWS_ACCESS_KEY_ID}}
             # AWS_SECRET_ACCESS_KEY : ${{secrets.AWS_SECRET_ACCESS_KEY}}
             # AWS_REGION: ${{secrets.AWS_REGION}}
