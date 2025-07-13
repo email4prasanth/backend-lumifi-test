@@ -138,7 +138,7 @@ jobs:
           ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
           echo "::set-output name=endpoint::$ENDPOINT"
         id: sls-info
-      
+
       - name: Show API Endpoint
         run: echo "Serverless API Endpoint: ${{ steps.sls-info.outputs.endpoint }}"
 
