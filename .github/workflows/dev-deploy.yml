@@ -143,18 +143,19 @@ jobs:
       #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
+
       - name: Update API Gateway Integrations
+        working-directory: backend-infra
         run: |
           terraform init -reconfigure
       - name: Select/Create Workspace
+        working-directory: backend-infra
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
       - name: Terraform Validate
+        working-directory: backend-infra
         run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
