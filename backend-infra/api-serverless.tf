@@ -34,5 +34,3 @@ resource "aws_lambda_permission" "serverless_api_gw" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.serverless_api.execution_arn}/*/*"
 }
-
-data "aws_caller_identity" "current" {}
