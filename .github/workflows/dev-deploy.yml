@@ -72,7 +72,7 @@ jobs:
         if: always()
 
   deploy-serverless:
-    needs: deploy-infrastructure
+    needs: aws-resources-deploy
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: dev
