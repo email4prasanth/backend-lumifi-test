@@ -63,12 +63,19 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      # # Cleanup Serverless API Gateway
-      # - name: Remove Serverless API Gateway
-      #   run: |
-      #     API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='$ENVIRONMENT-serverless-express-app'].ApiId" --output text)
-      #     [ -z "$API_ID" ] || aws apigatewayv2 delete-api --api-id $API_ID
-      #   continue-on-error: true
+      - name: Extract API Gateway URL
+        id: output
+        run: echo "API_URL=$(terraform output -raw api_url)" >> $GITHUB_OUTPUT
+
+      - name: Save Terraform Outputs
+        run: terraform output -json > outputs.json
+        if: always()
+
+      - name: Upload Terraform Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-outputs
+          path: backend-infra/outputs.json
 
 # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
 #       - name: Terraform Destroy
