@@ -141,9 +141,23 @@ jobs:
 
       # - name: Show API Endpoint
       #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
-
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
       - name: Update API Gateway Integrations
         run: |
           terraform init -reconfigure
           terraform workspace select $ENVIRONMENT
           terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
+
+      - name: Get API Gateway URL
+        id: output
+        run: |
+          API_URL=$(terraform output -raw api_url)
+          SERVERLESS_API_URL=$(terraform output -raw serverless_api_url)
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "serverless_api_url=$SERVERLESS_API_URL" >> $GITHUB_OUTPUT
+
+      - name: Show API Endpoints
+        run: |
+          echo "Test API URL: ${{ steps.output.outputs.api_url }}"
+          echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
