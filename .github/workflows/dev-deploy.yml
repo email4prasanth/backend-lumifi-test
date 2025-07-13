@@ -1,0 +1,79 @@
+# 
+name: Deploy lumifi backend Infrastructure to devevelopment environmnet
+
+on:
+  push:
+    branches:
+      - develop
+      
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  aws-resources-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-infra
+    env:
+      ENVIRONMENT: dev
+      AWS_REGION: us-east-1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials
+      - name: Configure AWS Credentials
+        env:
+          AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+        run: |
+          echo "$AWS_CREDENTIALS" > aws_credentials.json
+          AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
+          AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
+          
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+
+      # Package Lambda function
+      - name: Package Lambda function
+        run: |
+          cd lambda
+          zip -r test_function.zip test_function.py
+          cd ..
+
+      # Deploy Terraform infrastructure
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Select/Create Workspace
+        run: |
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      # # Cleanup Serverless API Gateway
+      # - name: Remove Serverless API Gateway
+      #   run: |
+      #     API_ID=$(aws apigatewayv2 get-apis --query "Items[?Name=='$ENVIRONMENT-serverless-express-app'].ApiId" --output text)
+      #     [ -z "$API_ID" ] || aws apigatewayv2 delete-api --api-id $API_ID
+      #   continue-on-error: true
+
+# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+#       - name: Terraform Destroy
+#         run: terraform destroy -auto-approve
+
+#       - name: Remove secretes folder
+#         run: |
+#           aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
