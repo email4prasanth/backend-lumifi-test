@@ -158,6 +158,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Apply
+        working-directory: backend-infra
         run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
 
       - name: Get API Gateway URL
