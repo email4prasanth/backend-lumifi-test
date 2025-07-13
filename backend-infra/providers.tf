@@ -1,3 +1,6 @@
+# Add this data source
+data "aws_caller_identity" "current" {}
+
 # Terraform Block with Required Providers
 terraform {
   required_providers {
