@@ -21,9 +21,9 @@ provider:
     DB_NAME: ${self:custom.dev.DB_NAME}
     DB_PORT: ${self:custom.dev.DB_PORT}
     PG_ENCRYPT_SECRET: ${self:custom.dev.PG_ENCRYPT_SECRET}
-    AWS_ACCESS_KEY_ID: ${self:custom.dev.AWS_ACCESS_KEY_ID}
-    AWS_SECRET_ACCESS_KEY: ${self:custom.dev.AWS_SECRET_ACCESS_KEY}
-    AWS_REGION: ${self:custom.dev.AWS_REGION}
+    # AWS_ACCESS_KEY_ID: ${self:custom.dev.AWS_ACCESS_KEY_ID}
+    # AWS_SECRET_ACCESS_KEY: ${self:custom.dev.AWS_SECRET_ACCESS_KEY}
+    # AWS_REGION: ${self:custom.dev.AWS_REGION}
     AWS_SES_SENDER_EMAIL: ${self:custom.dev.AWS_SES_SENDER_EMAIL}
     FE_APP_URL: ${self:custom.dev.FE_APP_URL}
 
