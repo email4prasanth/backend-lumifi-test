@@ -146,8 +146,18 @@ jobs:
       - name: Update API Gateway Integrations
         run: |
           terraform init -reconfigure
-          erraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
-          terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
+      - name: Select/Create Workspace
+        run: |
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
 
       - name: Get API Gateway URL
         id: output
