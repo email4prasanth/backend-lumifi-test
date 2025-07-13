@@ -138,7 +138,6 @@ jobs:
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
           echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
-        
 
       - name: Show API Endpoint
         run: echo "Serverless API Endpoint: ${{ steps.sls-info.outputs.endpoint }}"
