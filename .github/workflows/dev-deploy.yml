@@ -146,7 +146,7 @@ jobs:
       - name: Update API Gateway Integrations
         run: |
           terraform init -reconfigure
-          terraform workspace select $ENVIRONMENT
+          erraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
           terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
 
       - name: Get API Gateway URL
