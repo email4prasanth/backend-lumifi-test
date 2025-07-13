@@ -140,12 +140,4 @@ jobs:
           echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
 
       - name: Show API Endpoint
-        run: echo "Serverless API Endpoint: ${{ steps.sls-info.outputs.endpoint }}"
-
-# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-#       - name: Terraform Destroy
-#         run: terraform destroy -auto-approve
-
-#       - name: Remove secretes folder
-#         run: |
-#           aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
+        run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
