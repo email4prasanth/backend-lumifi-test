@@ -130,14 +130,20 @@ jobs:
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           
           # Deploy with license key
-          sls deploy --stage $ENVIRONMENT
+          sls deploy --stage $ENVIRONMENT --no-apigateway
 
-      - name: Get Serverless Endpoint
-        id: sls-info
+      # - name: Get Serverless Endpoint
+      #   id: sls-info
+      #   run: |
+      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+      #     ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
+      #     echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
+
+      # - name: Show API Endpoint
+      #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
+
+      - name: Update API Gateway Integrations
         run: |
-          export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-          ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
-          echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
-
-      - name: Show API Endpoint
-        run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
+          terraform init -reconfigure
+          terraform workspace select $ENVIRONMENT
+          terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy

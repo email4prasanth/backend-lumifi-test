@@ -14,6 +14,9 @@ provider:
   timeout: 29 # Max 900 seconds (15 minutes)
   httpApi:
     shouldStartNameWithService: true 
+  # To disable API Gateway creation
+  apiGateway:
+    disableDefaultEndpoint: true
   environment:
     API_ROOT_PATH: ${self:custom.dev.API_ROOT_PATH}
     JWT_SECRET: ${self:custom.dev.JWT_SECRET}
