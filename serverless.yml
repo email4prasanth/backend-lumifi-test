@@ -45,27 +45,27 @@ functions:
     handler: src/handler.practiceHandler
     events:
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/practice/software
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/software
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/practice/speciality
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/speciality
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/practice
+          path: /${self:custom.dev.API_ROOT_PATH}/practice
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/practice/register
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/register
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/practice/update
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/update
           method: PUT
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/practice/accountAdminAvailability
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/accountAdminAvailability
           method: GET
 
   userHandlerFunction:
@@ -73,27 +73,27 @@ functions:
     handler: src/handler.userHandler
     events:
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/user/role
+          path: /${self:custom.dev.API_ROOT_PATH}/user/role
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/user/list
+          path: /${self:custom.dev.API_ROOT_PATH}/user/list
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/user/detail
+          path: /${self:custom.dev.API_ROOT_PATH}/user/detail
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/user/create
+          path: /${self:custom.dev.API_ROOT_PATH}/user/create
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/user/update
+          path: /${self:custom.dev.API_ROOT_PATH}/user/update
           method: PUT
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/user/delete
+          path: /${self:custom.dev.API_ROOT_PATH}/user/delete
           method: DELETE
 
   stateHandlerFunction:
@@ -101,7 +101,7 @@ functions:
     handler: src/handler.stateHandler
     events:
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/state/list
+          path: /${self:custom.dev.API_ROOT_PATH}/state/list
           method: GET
 
   authHandlerFunction:
@@ -109,43 +109,43 @@ functions:
     handler: src/handler.authHandler
     events:
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/login
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/login
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/selectLoginPracticeAccount
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/selectLoginPracticeAccount
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/verifyOtp
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/verifyOtp
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/completion
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/completion
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/resendOtp
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/resendOtp
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/refreshToken
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/refreshToken
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/me
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/me
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/setPassword
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/setPassword
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/forgotPassword
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/forgotPassword
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/auth/resetPassword
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/resetPassword
           method: POST
 
   securityHandlerFunction:
@@ -153,7 +153,7 @@ functions:
     handler: src/handler.securityHandler
     events:
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/security/update
+          path: /${self:custom.dev.API_ROOT_PATH}/security/update
           method: PUT
 
   patientHandlerFunction:
@@ -161,25 +161,25 @@ functions:
     handler: src/handler.patientHandler
     events:
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/patient/create
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/create
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/patient/update
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/update
           method: PUT
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/patient/delete
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/delete
           method: DELETE
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/patient/detail
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/detail
           method: GET
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/patient/list
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/list
           method: POST
 
       - httpApi:
-          path: ${self:custom.dev.API_ROOT_PATH}/patient/search
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/search
           method: POST
