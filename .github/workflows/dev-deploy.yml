@@ -105,11 +105,6 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
-      - name: Login to Serverless
-        run: |
-          serverless login --console
-          echo "SERVERLESS_ACCESS_KEY=${{ secrets.SERVERLESS_ACCESS_KEY }}" >> $GITHUB_ENV
-
       - name: Create env.yml
         run: |
           cat <<EOF > env.yml
@@ -127,10 +122,12 @@ jobs:
           EOF
 
       - name: Deploy Serverless Application
-        env:
-          SERVERLESS_LICENSE_KEY: ${{ secrets.SERVERLESS_LICENSE_KEY }}
-
-        run: sls deploy --stage $ENVIRONMENT
+        run: |
+          # Set license key as environment variable
+          export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+          
+          # Deploy with license key
+          sls deploy --stage $ENVIRONMENT
 
 # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
 #       - name: Terraform Destroy
