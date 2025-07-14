@@ -14,6 +14,9 @@ provider:
   timeout: 29 # Max 900 seconds (15 minutes)
   httpApi:
     shouldStartNameWithService: true 
+    accessLogSettings:
+      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+
   # To disable API Gateway creation
   apiGateway:
     disableDefaultEndpoint: true
@@ -30,9 +33,6 @@ provider:
 
   logs:
     httpApi: true
-  httpApi:
-    accessLogSettings:
-      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
 
   environment:
     API_ROOT_PATH: ${self:custom.dev.API_ROOT_PATH}
