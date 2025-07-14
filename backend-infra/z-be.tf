@@ -36,6 +36,45 @@
 
 
 
+# ### File: api-serverless.tf ###
+# # Create a new API Gateway for serverless functions
+# resource "aws_apigatewayv2_api" "serverless_api" {
+#   name          = "${local.project_name.name}-${terraform.workspace}-serverless-api"
+#   protocol_type = "HTTP"
+#   tags          = merge(local.tags, local.project_name)
+# }
+
+# resource "aws_apigatewayv2_stage" "serverless_api" {
+#   api_id      = aws_apigatewayv2_api.serverless_api.id
+#   name        = "$default"
+#   auto_deploy = true
+# }
+
+# # Create a wildcard integration for /api/v1/*
+# resource "aws_apigatewayv2_integration" "serverless_root" {
+#   api_id             = aws_apigatewayv2_api.serverless_api.id
+#   integration_type   = "AWS_PROXY"
+#   integration_method = "POST"
+#   integration_uri    = "arn:aws:apigateway:${local.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${local.aws_region}:${data.aws_caller_identity.current.account_id}:function:serverless-express-app-dev-api/invocations"
+# }
+
+# # Create a catch-all route for /api/v1/*
+# resource "aws_apigatewayv2_route" "api_v1_proxy" {
+#   api_id    = aws_apigatewayv2_api.serverless_api.id
+#   route_key = "ANY /api/v1/{proxy+}"
+#   target    = "integrations/${aws_apigatewayv2_integration.serverless_root.id}"
+# }
+
+# # Grant API Gateway permission to invoke the Lambda
+# resource "aws_lambda_permission" "serverless_api_gw" {
+#   statement_id  = "AllowServerlessAPIGatewayInvoke"
+#   action        = "lambda:InvokeFunction"
+#   function_name = "serverless-express-app-dev-api"
+#   principal     = "apigateway.amazonaws.com"
+#   source_arn    = "${aws_apigatewayv2_api.serverless_api.execution_arn}/*/*"
+# }
+
+
 # ### File: backend.tf ###
 # # Terraform Remote Backend Configuration - S3 for backend code 
 # terraform {
@@ -233,8 +272,24 @@
 #   value = "${aws_apigatewayv2_api.lambda1_api.api_endpoint}/test"
 # }
 
+# output "serverless_api_url" {
+#   value = aws_apigatewayv2_api.serverless_api.api_endpoint
+# }
+
+# # Add these outputs
+# output "api_gateway_id" {
+#   value = aws_apigatewayv2_api.lambda1_api.id
+# }
+
+# output "api_gateway_execution_arn" {
+#   value = aws_apigatewayv2_api.lambda1_api.execution_arn
+# }
+
 
 # ### File: providers.tf ###
+# # Add this data source
+# data "aws_caller_identity" "current" {}
+
 # # Terraform Block with Required Providers
 # terraform {
 #   required_providers {
@@ -252,50 +307,50 @@
 
 
 # ### File: rds.tf ###
-# # # Random Password for RDS Admin
-# # resource "random_password" "db_admin_password" {
-# #   length           = 16
-# #   special          = true
-# #   override_special = "!$%^&*()-_=+?"
-# # }
-# # # RDS Subnet Group (Using Public Subnets)
-# # resource "aws_db_subnet_group" "public_db" {
-# #   name       = "${terraform.workspace}-lumifi-public-db-subnet-group"
-# #   subnet_ids = aws_subnet.lumifi_subnets[*].id
+# # Random Password for RDS Admin
+# resource "random_password" "db_admin_password" {
+#   length           = 16
+#   special          = true
+#   override_special = "!$%^&*()-_=+?"
+# }
+# # RDS Subnet Group (Using Public Subnets)
+# resource "aws_db_subnet_group" "public_db" {
+#   name       = "${terraform.workspace}-lumifi-public-db-subnet-group"
+#   subnet_ids = aws_subnet.lumifi_subnets[*].id
 
-# #   tags = merge(local.tags, {
-# #     Name = "${terraform.workspace}-db-subnet-group"
-# #   })
-# # }
+#   tags = merge(local.tags, {
+#     Name = "${terraform.workspace}-db-subnet-group"
+#   })
+# }
 
-# # # PostgreSQL RDS Instance
-# # resource "aws_db_instance" "postgres" {
-# #   identifier        = "${terraform.workspace}-lumifi-db"
-# #   allocated_storage = local.rds.allocated_storage
-# #   storage_type      = "gp3"
-# #   engine            = "postgres"
-# #   engine_version    = "15"
-# #   # Updated instance types per environment
-# #   # instance_class = terraform.workspace == "prod" ? "db.t4g.medium" : "db.t3.small"
-# #   instance_class = terraform.workspace == "prod" ? "db.t4g.medium" : "db.t3.micro" # For testing
-# #   # Multi-AZ configuration
-# #   multi_az               = terraform.workspace == "prod" ? true : false
-# #   db_name                = "${terraform.workspace}_lumifi"
-# #   username               = "dbadmin"
-# #   password               = random_password.db_admin_password.result
-# #   parameter_group_name   = "default.postgres15"
-# #   skip_final_snapshot    = terraform.workspace == "dev" ? true : false
-# #   vpc_security_group_ids = [aws_security_group.rds.id]
-# #   db_subnet_group_name   = aws_db_subnet_group.public_db.name
-# #   publicly_accessible    = true
-# #   apply_immediately      = true
-# #   tags                   = local.tags
-# #   depends_on = [
-# #     aws_internet_gateway.lumifi-igw,
-# #     aws_route_table.lumifi-pub-rt,
-# #     aws_security_group.lumifi_sg
-# #   ]
-# # }
+# # PostgreSQL RDS Instance
+# resource "aws_db_instance" "postgres" {
+#   identifier        = "${terraform.workspace}-lumifi-db"
+#   allocated_storage = local.rds.allocated_storage
+#   storage_type      = "gp3"
+#   engine            = "postgres"
+#   engine_version    = "15"
+#   # Updated instance types per environment
+#   # instance_class = terraform.workspace == "prod" ? "db.t4g.medium" : "db.t3.small"
+#   instance_class = terraform.workspace == "prod" ? "db.t4g.medium" : "db.t3.micro" # For testing
+#   # Multi-AZ configuration
+#   multi_az               = terraform.workspace == "prod" ? true : false
+#   db_name                = "${terraform.workspace}_lumifi"
+#   username               = "dbadmin"
+#   password               = random_password.db_admin_password.result
+#   parameter_group_name   = "default.postgres15"
+#   skip_final_snapshot    = terraform.workspace == "dev" ? true : false
+#   vpc_security_group_ids = [aws_security_group.rds.id]
+#   db_subnet_group_name   = aws_db_subnet_group.public_db.name
+#   publicly_accessible    = true
+#   apply_immediately      = true
+#   tags                   = local.tags
+#   depends_on = [
+#     aws_internet_gateway.lumifi-igw,
+#     aws_route_table.lumifi-pub-rt,
+#     aws_security_group.lumifi_sg
+#   ]
+# }
 
 
 # ### File: s3.tf ###
@@ -337,23 +392,23 @@
 
 
 # ### File: secrets.tf ###
-# # # Secrets Manager - RDS Credentials
-# # resource "aws_secretsmanager_secret" "rds_credentials" {
-# #   name        = "${terraform.workspace}-${local.project_name.name}-rds_credentials-backend-v1"
-# #   description = "PostgreSQL credentials for ${terraform.workspace}"
-# #   tags        = local.tags
-# # }
-# # resource "aws_secretsmanager_secret_version" "rds_credentials" {
-# #   secret_id = aws_secretsmanager_secret.rds_credentials.id
-# #   secret_string = jsonencode({
-# #     username = aws_db_instance.postgres.username
-# #     password = random_password.db_admin_password.result
-# #     endpoint = aws_db_instance.postgres.endpoint
-# #     db_name  = aws_db_instance.postgres.db_name
-# #     engine   = "postgres"
-# #     port     = 5432
-# #   })
-# # }
+# # Secrets Manager - RDS Credentials
+# resource "aws_secretsmanager_secret" "rds_credentials" {
+#   name        = "${terraform.workspace}-${local.project_name.name}-rds_credentials-backend-v1"
+#   description = "PostgreSQL credentials for ${terraform.workspace}"
+#   tags        = local.tags
+# }
+# resource "aws_secretsmanager_secret_version" "rds_credentials" {
+#   secret_id = aws_secretsmanager_secret.rds_credentials.id
+#   secret_string = jsonencode({
+#     username = aws_db_instance.postgres.username
+#     password = random_password.db_admin_password.result
+#     endpoint = aws_db_instance.postgres.endpoint
+#     db_name  = aws_db_instance.postgres.db_name
+#     engine   = "postgres"
+#     port     = 5432
+#   })
+# }
 
 
 # ### File: security_groups.tf ###
