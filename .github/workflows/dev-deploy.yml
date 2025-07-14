@@ -102,6 +102,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Build TypeScript
+        run: npm run build  # Add "build": "tsc" to package.json scripts
+
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
@@ -161,15 +164,15 @@ jobs:
         working-directory: backend-infra
         run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
 
-      - name: Get API Gateway URL
-        id: output
-        run: |
-          API_URL=$(terraform output -raw api_url)
-          SERVERLESS_API_URL=$(terraform output -raw serverless_api_url)
-          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
-          echo "serverless_api_url=$SERVERLESS_API_URL" >> $GITHUB_OUTPUT
+      # - name: Get API Gateway URL
+      #   id: output
+      #   run: |
+      #     API_URL=$(terraform output -raw api_url)
+      #     SERVERLESS_API_URL=$(terraform output -raw serverless_api_url)
+      #     echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+      #     echo "serverless_api_url=$SERVERLESS_API_URL" >> $GITHUB_OUTPUT
 
-      - name: Show API Endpoints
-        run: |
-          echo "Test API URL: ${{ steps.output.outputs.api_url }}"
-          echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
+      # - name: Show API Endpoints
+      #   run: |
+      #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
+      #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"

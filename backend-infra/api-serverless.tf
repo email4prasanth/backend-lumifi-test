@@ -16,7 +16,8 @@ resource "aws_apigatewayv2_integration" "serverless_root" {
   api_id             = aws_apigatewayv2_api.serverless_api.id
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
-  integration_uri    = "arn:aws:apigateway:${local.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${local.aws_region}:${data.aws_caller_identity.current.account_id}:function:serverless-express-app-dev-api/invocations"
+  # integration_uri    = "arn:aws:apigateway:${local.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${local.aws_region}:${data.aws_caller_identity.current.account_id}:function:serverless-express-app-dev-api/invocations"
+  integration_uri = "arn:aws:lambda:${local.aws_region}:${data.aws_caller_identity.current.account_id}:function:serverless-express-app-dev-api"
 }
 
 # Create a catch-all route for /api/v1/*

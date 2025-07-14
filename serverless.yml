@@ -17,6 +17,23 @@ provider:
   # To disable API Gateway creation
   apiGateway:
     disableDefaultEndpoint: true
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+          Resource: "arn:aws:logs:*:*:*"
+
+  logs:
+    httpApi: true
+  httpApi:
+    accessLogSettings:
+      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+
   environment:
     API_ROOT_PATH: ${self:custom.dev.API_ROOT_PATH}
     JWT_SECRET: ${self:custom.dev.JWT_SECRET}
