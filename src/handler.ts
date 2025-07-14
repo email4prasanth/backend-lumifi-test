@@ -109,8 +109,19 @@ export const patientHandler = async (event: APIGatewayProxyEventV2) => {
 };
 
 export const hello = async () => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: 'Hello from Serverless!' }),
-  };
+  try {
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: 'Hello from Serverless!' }),
+    };
+  } catch (error) {
+    console.error('Error in hello handler:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Internal Server Error' }),
+    };
+  }
 };
