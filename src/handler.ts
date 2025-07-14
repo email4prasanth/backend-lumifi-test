@@ -121,7 +121,7 @@ export const hello = async () => {
     console.error('Error in hello handler:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Internal Server Error' }),
+      body: JSON.stringify({ message: 'Internal Server Error-500' }),
     };
   }
 };
