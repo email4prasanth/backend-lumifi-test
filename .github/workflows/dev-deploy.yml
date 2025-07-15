@@ -59,16 +59,36 @@ jobs:
           DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
           echo "Full RDS Endpoint: $DB_ENDPOINT_FULL"
           
-          # Extract host and port
-          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
-          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          # # Extract host and port
+          # DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
+          # DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          
+          # echo "Parsed DB_HOST: $DB_HOST"
+          # echo "Parsed DB_PORT: $DB_PORT"
+          
+          # # Set outputs - ADD TRIM AND VALIDATION
+          # echo "db_host=$DB_HOST" >> $GITHUB_OUTPUT
+          # echo "db_port=$DB_PORT" >> $GITHUB_OUTPUT
+
+          # Use awk to reliably extract host and port
+          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | awk -F: '{print $NF}')
+          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | awk -F: '{print $1}')
+          
+          # Trim whitespace and validate
+          DB_HOST=$(echo "$DB_HOST" | xargs)
+          DB_PORT=$(echo "$DB_PORT" | xargs)
+          
+          # Validate values are non-empty
+          if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ]; then
+            echo "ERROR: Failed to parse RDS endpoint"
+            echo "DB_HOST='$DB_HOST' DB_PORT='$DB_PORT'"
+            exit 1
+          fi
           
           echo "Parsed DB_HOST: $DB_HOST"
           echo "Parsed DB_PORT: $DB_PORT"
           
-          # Set outputs - ADD TRIM AND VALIDATION
-          DB_HOST=$(echo $DB_HOST | xargs)  # Trim whitespace
-          DB_PORT=$(echo $DB_PORT | xargs)  # Trim whitespace
+          # Set outputs
           echo "db_host=$DB_HOST" >> $GITHUB_OUTPUT
           echo "db_port=$DB_PORT" >> $GITHUB_OUTPUT
 
