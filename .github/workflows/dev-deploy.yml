@@ -54,22 +54,22 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      - name: Terraform Validate
-        run: terraform validate
+      # - name: Terraform Validate
+      #   run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
+      # - name: Terraform Plan
+      #   run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
 
-      - name: Extract API Gateway URL
-        id: output
-        run: echo "API_URL=$(terraform output -raw api_url)" >> $GITHUB_OUTPUT
+      # - name: Extract API Gateway URL
+      #   id: output
+      #   run: echo "API_URL=$(terraform output -raw api_url)" >> $GITHUB_OUTPUT
 
-      - name: Save Terraform Outputs
-        run: terraform output -json > outputs.json
-        if: always()
+      # - name: Save Terraform Outputs
+      #   run: terraform output -json > outputs.json
+      #   if: always()
 
   deploy-serverless:
     needs: aws-resources-deploy
@@ -156,13 +156,13 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      - name: Terraform Validate
-        working-directory: backend-infra
-        run: terraform validate
+      # - name: Terraform Validate
+      #   working-directory: backend-infra
+      #   run: terraform validate
 
-      - name: Terraform Apply
-        working-directory: backend-infra
-        run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
+      # - name: Terraform Apply
+      #   working-directory: backend-infra
+      #   run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
 
       # - name: Get API Gateway URL
       #   id: output
@@ -176,3 +176,8 @@ jobs:
       #   run: |
       #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
       #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
+
+# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+      - name: Terraform Destroy
+        working-directory: backend-infra
+        run: terraform destroy -auto-approve
