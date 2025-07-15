@@ -30,13 +30,17 @@ jobs:
         env:
           AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
         run: |
-          echo "$AWS_CREDENTIALS" > aws_credentials.json
-          AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-          AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
+          # echo "$AWS_CREDENTIALS" > aws_credentials.json
+          # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
+          # AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
           
-          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+          # echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+
+          echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+
 
       # Deploy Terraform infrastructure
       - name: Set up Terraform
@@ -58,7 +62,7 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      # Get and parse RDS endpoint
+      # Get and parse RDS endpoint seperate endpoint and port
       - name: Get and Parse RDS Endpoint
         id: set-db-outputs
         run: |
@@ -83,7 +87,6 @@ jobs:
       ENVIRONMENT: dev
       AWS_REGION: us-east-1
       API_ROOT_PATH: api/v1
-      # SECRET_NAME: lumifi-backend/$ENVIRONMENT-secrets
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -92,13 +95,17 @@ jobs:
         env:
           AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
         run: |
-          echo "$AWS_CREDENTIALS" > aws_credentials.json
-          AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-          AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
+          # echo "$AWS_CREDENTIALS" > aws_credentials.json
+          # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
+          # AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
           
-          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+          # echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+
+          echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -137,7 +144,6 @@ jobs:
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
         run: |
-          # SECRET_NAME="lumifi-backend/$ENVIRONMENT-secrets"
           SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v1"
           echo "Retrieving secrets from: $SECRET_NAME"
           SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET_NAME --query ARN --output text)
@@ -188,7 +194,7 @@ jobs:
           echo "env.yml contents (redacted):"
           grep -v -E 'DB_PASSWORD|JWT_SECRET|PG_ENCRYPT_SECRET' env.yml
 
-      - name: Deploy Serverless Application
+      - name: Deploy Serverless App & API Gateway Endpoints
         run: |
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           sls deploy --stage $ENVIRONMENT
