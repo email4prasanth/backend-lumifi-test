@@ -172,6 +172,17 @@
 
 
 
+# ### File: outputs.tf ###
+# # outputs.tf (in Terraform)
+# output "lambda_sg_id" {
+#   value = aws_security_group.lambda_sg.id
+# }
+
+# output "subnet_ids" {
+#   value = aws_subnet.lumifi_subnets[*].id
+# }
+
+
 # ### File: providers.tf ###
 # # Add this data source
 # data "aws_caller_identity" "current" {}

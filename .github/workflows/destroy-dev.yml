@@ -77,7 +77,7 @@ jobs:
         run: terraform init -reconfigure
 
       - name: Select Workspace
-        run: terraform workspace select $ENVIRONMENT
+        run: terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
