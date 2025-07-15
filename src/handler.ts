@@ -109,12 +109,11 @@ export const patientHandler = async (event: APIGatewayProxyEventV2) => {
 };
 
 export const hello = async () => {
+  console.log('HELLO FUNCTION TRIGGERED');
+  
   try {
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ message: 'Hello from Serverless!' }),
     };
   } catch (error) {
