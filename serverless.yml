@@ -1,4 +1,4 @@
-service: serverless-express-app
+service: lumifi-sls
 
 frameworkVersion: '>=4.0.0'
 
@@ -54,7 +54,6 @@ plugins:
 
 functions:
   api:
-    name: ${self:service}-${sls:stage}-api
     handler: src/handler.hello
     events:
       - httpApi:

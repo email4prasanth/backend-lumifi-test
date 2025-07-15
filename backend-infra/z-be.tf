@@ -162,6 +162,16 @@
 #   receiver_email = "marriprasanth.p@hubino.com"
 
 #   api_root_path = "api/v1"
+
+#   lambda_functions = {
+#     security  = "securityHandlerFunction"
+#     state     = "stateHandlerFunction"
+#     api       = "api"
+#     patient   = "patientHandlerFunction"
+#     user      = "userHandlerFunction"
+#     practice  = "practiceHandlerFunction"
+#     auth      = "authHandlerFunction"
+#   }
 # }
 
 
@@ -441,7 +451,7 @@
 #   }
 # }
 
-# # Associate Route Table with All Public Subnets   
+# # Associate Route Table with All Public Subnets
 # resource "aws_route_table_association" "subnet_associations" {
 #   count = length(aws_subnet.lumifi_subnets)
 
