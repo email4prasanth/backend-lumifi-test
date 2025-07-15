@@ -88,6 +88,12 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
+      # Set DB host/port from previous job
+      - name: Set database connection info
+        run: |
+          echo "DB_HOST=${{ needs.aws-resources-deploy.outputs.db_host }}" >> $GITHUB_ENV
+          echo "DB_PORT=${{ needs.aws-resources-deploy.outputs.db_port }}" >> $GITHUB_ENV
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -131,23 +137,18 @@ jobs:
           echo "Secret ARN: $SECRET_ARN"
           
           # Retrieve secret value
-          SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
           echo "Raw secret value retrieved"
-          echo "$SECRET_VALUE" > secret.json
           
           # Parse values
-          DB_NAME=$(jq -r '.db_name' secret.json)
-          DB_USER=$(jq -r '.db_user' secret.json)
-          DB_PASSWORD=$(jq -r '.db_password' secret.json)
-          DB_PORT=$(jq -r '.db_port' secret.json)
+          DB_NAME=$(echo "$SECRET_JSON" | jq -r '.db_name')
+          DB_USER=$(echo "$SECRET_JSON" | jq -r '.db_user')
+          DB_PASSWORD=$(echo "$SECRET_JSON" | jq -r '.db_password')
 
-          
           # Log non-sensitive values
-          echo "DB_HOST: ${{ needs.aws-resources-deploy.outputs.db_host }}"
-          echo "DB_USER: $DB_USER"
           echo "DB_NAME: $DB_NAME"
           echo "DB_USER: $DB_USER"
-          echo "DB_PORT: $DB_PORT"
+          
           
           # Set environment variables
           echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
@@ -160,7 +161,7 @@ jobs:
         run: |
           cat <<EOF > env.yml
           $ENVIRONMENT:
-            DB_HOST: ${{ needs.aws-resources-deploy.outputs.db_host }}
+            DB_HOST: ${{ env.DB_HOST }}
             DB_NAME: ${{ env.DB_NAME }}
             DB_USER: ${{ env.DB_USER }}
             DB_PASSWORD: ${{ env.DB_PASSWORD }}
