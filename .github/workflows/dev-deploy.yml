@@ -114,18 +114,15 @@ jobs:
             exit 1
           fi
 
+      - name: Build TypeScript
+        run: npm run build  # Add "build": "tsc" to package.json scripts
+
       - name: Verify deployment package
         run: |
           echo "Dist contents:"
           ls -la dist/
           echo "Node modules:"
           ls -la node_modules/ | grep pg
-
-      - name: Build TypeScript
-        run: npm run build  # Add "build": "tsc" to package.json scripts
-
-      # - name: Verify build output
-      #   run: ls -la dist/  # Ensure files exist
 
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
