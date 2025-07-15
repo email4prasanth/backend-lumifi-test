@@ -92,6 +92,28 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
+      # Get and parse RDS endpoint seperate endpoint and port
+      - name: Get and Parse RDS Endpoint
+        id: set-db-outputs
+        run: |
+          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
+          echo "Full RDS Endpoint: $DB_ENDPOINT_FULL"
+          
+          # Extract host and port
+          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
+          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          
+          echo "Parsed DB_HOST: $DB_HOST"
+          echo "Parsed DB_PORT: $DB_PORT"
+          
+          # Set outputs - ADD TRIM AND VALIDATION
+          echo "db_host=$DB_HOST" >> $GITHUB_OUTPUT
+          echo "db_port=$DB_PORT" >> $GITHUB_OUTPUT
+
+          echo "GITHUB_OUTPUT contents:"
+          cat $GITHUB_OUTPUT
+          echo "--- End of GITHUB_OUTPUT ---"
+
 
       - name: Validate and use outputs
         run: |
