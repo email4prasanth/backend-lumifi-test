@@ -83,7 +83,7 @@ jobs:
       ENVIRONMENT: dev
       AWS_REGION: us-east-1
       API_ROOT_PATH: api/v1
-      SECRET_NAME: lumifi-backend/$ENVIRONMENT-secrets
+      # SECRET_NAME: lumifi-backend/$ENVIRONMENT-secrets
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -137,6 +137,8 @@ jobs:
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
         run: |
+          # SECRET_NAME="lumifi-backend/$ENVIRONMENT-secrets"
+          SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v1"
           echo "Retrieving secrets from: $SECRET_NAME"
           SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET_NAME --query ARN --output text)
           echo "Secret ARN: $SECRET_ARN"
@@ -151,11 +153,7 @@ jobs:
           DB_USER=$(jq -r '.db_user' secret.json)
           DB_PASSWORD=$(jq -r '.db_password' secret.json)
           DB_PORT=$(jq -r '.db_port' secret.json)
-          JWT_SECRET=$(jq -r '.jwt_secret' secret.json)
-          PG_ENCRYPT_SECRET=$(jq -r '.pg_encrypt_secret' secret.json)
-          
-          # Use RDS port from Terraform output instead of secret
-          DB_PORT=${{ needs.aws-resources-deploy.outputs.db_port }}
+
           
           # Log non-sensitive values
           echo "DB_HOST: ${{ needs.aws-resources-deploy.outputs.db_host }}"
@@ -168,8 +166,6 @@ jobs:
           echo "DB_USER=$DB_USER" >> $GITHUB_ENV
           echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
           echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
-          echo "JWT_SECRET=$JWT_SECRET" >> $GITHUB_ENV
-          echo "PG_ENCRYPT_SECRET=$PG_ENCRYPT_SECRET" >> $GITHUB_ENV
 
       - name: Create env.yml
         run: |
