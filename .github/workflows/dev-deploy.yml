@@ -98,9 +98,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm' # Cache npm dependencies
+
+      - name: Show package.json
+        run: cat package.json
 
       - name: Install dependencies
         run: npm install
+
+      - name: Verify pg package
+        run: |
+          if [ -d "node_modules/pg" ]; then
+            echo "pg package found in node_modules"
+          else
+            echo "Error: pg package not found in node_modules"
+            exit 1
+          fi
 
       - name: Build TypeScript
         run: npm run build  # Add "build": "tsc" to package.json scripts
