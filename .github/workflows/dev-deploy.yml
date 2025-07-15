@@ -36,13 +36,6 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-      # # Package Lambda function
-      # - name: Package Lambda function
-      #   run: |
-      #     cd lambda
-      #     zip -r test_function.zip test_function.py
-      #     cd ..
-
       # Deploy Terraform infrastructure
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -54,22 +47,14 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      # - name: Terraform Validate
-      #   run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve tfplan
-
-      # - name: Extract API Gateway URL
-      #   id: output
-      #   run: echo "API_URL=$(terraform output -raw api_url)" >> $GITHUB_OUTPUT
-
-      # - name: Save Terraform Outputs
-      #   run: terraform output -json > outputs.json
-      #   if: always()
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
   deploy-serverless:
     needs: aws-resources-deploy
@@ -146,59 +131,7 @@ jobs:
             # AWS_REGION: ${{secrets.AWS_REGION}}
           EOF
 
-      # - name: Deploy Serverless Application
-      #   run: |
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-      #     sls deploy --stage $ENVIRONMENT
-
-      - name: Destroy Serverless Resources
+      - name: Deploy Serverless Application
         run: |
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-          sls remove --stage $ENVIRONMENT
-
-      # - name: Get Serverless Endpoint
-      #   id: sls-info
-      #   run: |
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-      #     ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
-      #     echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
-
-      # - name: Show API Endpoint
-      #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
-      # - name: Set up Terraform
-      #   uses: hashicorp/setup-terraform@v3
-
-      # - name: Update API Gateway Integrations
-      #   working-directory: backend-infra
-      #   run: |
-      #     terraform init -reconfigure
-      # - name: Select/Create Workspace
-      #   working-directory: backend-infra
-      #   run: |
-      #     terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
-
-      # - name: Terraform Validate
-      #   working-directory: backend-infra
-      #   run: terraform validate
-
-      # - name: Terraform Apply
-      #   working-directory: backend-infra
-      #   run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_routes
-
-      # - name: Get API Gateway URL
-      #   id: output
-      #   run: |
-      #     API_URL=$(terraform output -raw api_url)
-      #     SERVERLESS_API_URL=$(terraform output -raw serverless_api_url)
-      #     echo "api_url=$API_URL" >> $GITHUB_OUTPUT
-      #     echo "serverless_api_url=$SERVERLESS_API_URL" >> $GITHUB_OUTPUT
-
-      # - name: Show API Endpoints
-      #   run: |
-      #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
-      #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
-
-# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-      - name: Terraform Destroy
-        working-directory: backend-infra
-        run: terraform destroy -auto-approve
+          sls deploy --stage $ENVIRONMENT

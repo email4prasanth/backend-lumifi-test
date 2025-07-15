@@ -5,12 +5,14 @@ frameworkVersion: '>=4.0.0'
 custom:
   serverless-offline:
     httpPort: 3001
-  dev: ${file(./env.yml):dev}
+#   dev: ${file(./env.yml):dev}
+  env: ${file(./env.yml):${opt:stage, self:provider.stage, 'dev'}}
 
 provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
+  stage: ${opt:stage, 'dev'}
   timeout: 29 # Max 900 seconds (15 minutes)
   httpApi:
     shouldStartNameWithService: true 
@@ -77,7 +79,7 @@ functions:
 
   practiceHandlerFunction:
     timeout: 29 # Max 900 seconds (15 minutes)
-    handler: src/handler.practiceHandler
+    handler: dist/handler.practiceHandler
     events:
       - httpApi:
           path: /${self:custom.dev.API_ROOT_PATH}/practice/software
@@ -105,7 +107,7 @@ functions:
 
   userHandlerFunction:
     timeout: 29 # Max 900 seconds (15 minutes)
-    handler: src/handler.userHandler
+    handler: dist/handler.userHandler
     events:
       - httpApi:
           path: /${self:custom.dev.API_ROOT_PATH}/user/role
@@ -133,7 +135,7 @@ functions:
 
   stateHandlerFunction:
     timeout: 29 # Max 900 seconds (15 minutes)
-    handler: src/handler.stateHandler
+    handler: dist/handler.stateHandler
     events:
       - httpApi:
           path: /${self:custom.dev.API_ROOT_PATH}/state/list
@@ -141,7 +143,7 @@ functions:
 
   authHandlerFunction:
     timeout: 29 # Max 900 seconds (15 minutes)
-    handler: src/handler.authHandler
+    handler: dist/handler.authHandler
     events:
       - httpApi:
           path: /${self:custom.dev.API_ROOT_PATH}/auth/login
@@ -185,7 +187,7 @@ functions:
 
   securityHandlerFunction:
     timeout: 29 # Max 900 seconds (15 minutes)
-    handler: src/handler.securityHandler
+    handler: dist/handler.securityHandler
     events:
       - httpApi:
           path: /${self:custom.dev.API_ROOT_PATH}/security/update
@@ -193,7 +195,7 @@ functions:
 
   patientHandlerFunction:
     timeout: 29 # Max 900 seconds (15 minutes)
-    handler: src/handler.patientHandler
+    handler: dist/handler.patientHandler
     events:
       - httpApi:
           path: /${self:custom.dev.API_ROOT_PATH}/patient/create
