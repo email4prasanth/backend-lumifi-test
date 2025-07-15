@@ -54,14 +54,14 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      # - name: Terraform Validate
-      #   run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
       # - name: Extract API Gateway URL
       #   id: output
@@ -139,15 +139,15 @@ jobs:
             # AWS_REGION: ${{secrets.AWS_REGION}}
           EOF
 
-      # - name: Deploy Serverless Application
-      #   run: |
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-      #     sls deploy --stage $ENVIRONMENT
-
-      - name: Destroy Serverless Resources
+      - name: Deploy Serverless Application
         run: |
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-          sls remove --stage $ENVIRONMENT
+          sls deploy --stage $ENVIRONMENT
+
+      # - name: Destroy Serverless Resources
+      #   run: |
+      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+      #     sls remove --stage $ENVIRONMENT
 
       # - name: Get Serverless Endpoint
       #   id: sls-info
