@@ -7,11 +7,11 @@ resource "aws_secretsmanager_secret" "rds_credentials" {
 resource "aws_secretsmanager_secret_version" "rds_credentials" {
   secret_id = aws_secretsmanager_secret.rds_credentials.id
   secret_string = jsonencode({
-    username = aws_db_instance.postgres.username
-    password = random_password.db_admin_password.result
-    endpoint = aws_db_instance.postgres.endpoint
+    db_user = aws_db_instance.postgres.username
+    db_password = random_password.db_admin_password.result
+    db_endpoint = aws_db_instance.postgres.endpoint
     db_name  = aws_db_instance.postgres.db_name
-    engine   = "postgres"
-    port     = 5432
+    db_engine   = "postgres"
+    db_port     = 5432
   })
 }
