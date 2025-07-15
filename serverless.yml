@@ -16,6 +16,7 @@ provider:
     shouldStartNameWithService: true 
     accessLogSettings:
       format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+    cors: true
 
   # To disable API Gateway creation
   apiGateway:
@@ -30,6 +31,10 @@ provider:
             - "logs:CreateLogStream"
             - "logs:PutLogEvents"
           Resource: "arn:aws:logs:*:*:*"
+        - Effect: Allow
+          Action:
+            - "rds-db:connect"
+          Resource: "*"
 
   logs:
     httpApi: true
@@ -49,12 +54,22 @@ provider:
     AWS_SES_SENDER_EMAIL: ${self:custom.dev.AWS_SES_SENDER_EMAIL}
     FE_APP_URL: ${self:custom.dev.FE_APP_URL}
 
+package:
+  patterns:
+    - '!./**'           # Exclude everything
+    - 'dist/**'         # Include compiled JS
+    - 'node_modules/**' # Include dependencies
+    - '!node_modules/aws-sdk/**'  # Exclude AWS SDK
+  individually: false
+
+
 plugins:
   - serverless-offline
 
 functions:
   api:
-    handler: src/handler.hello
+    # handler: src/handler.hello
+    handler: dist/handler.hello
     events:
       - httpApi:
           path: /hello
