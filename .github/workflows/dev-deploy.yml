@@ -201,4 +201,4 @@ jobs:
 # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
       - name: Terraform Destroy
         working-directory: backend-infra
-        run: terraform destroy -auto-approve
+        run: terraform destroy --auto-approve
