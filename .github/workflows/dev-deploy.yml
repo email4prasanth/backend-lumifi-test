@@ -29,8 +29,8 @@ jobs:
       - name: Configure AWS Credentials
         env:
           # AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
-          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         run: |
           # echo "$AWS_CREDENTIALS" > aws_credentials.json
           # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
@@ -95,7 +95,9 @@ jobs:
 
       - name: Configure AWS Credentials
         env:
-          AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+          # AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         run: |
           # echo "$AWS_CREDENTIALS" > aws_credentials.json
           # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
