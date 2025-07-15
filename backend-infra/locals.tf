@@ -115,6 +115,16 @@ locals {
   receiver_email = "marriprasanth.p@hubino.com"
 
   api_root_path = "api/v1"
+
+  lambda_functions = {
+    security  = "securityHandlerFunction"
+    state     = "stateHandlerFunction"
+    api       = "api"
+    patient   = "patientHandlerFunction"
+    user      = "userHandlerFunction"
+    practice  = "practiceHandlerFunction"
+    auth      = "authHandlerFunction"
+  }
 }
 
 

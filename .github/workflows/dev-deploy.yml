@@ -167,7 +167,7 @@ jobs:
 
       - name: Terraform Apply
         working-directory: backend-infra
-        run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
+        run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_routes
 
       # - name: Get API Gateway URL
       #   id: output

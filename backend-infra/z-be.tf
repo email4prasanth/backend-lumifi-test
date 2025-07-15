@@ -441,7 +441,7 @@
 #   }
 # }
 
-# # Associate Route Table with All Public Subnets
+# # Associate Route Table with All Public Subnets   
 # resource "aws_route_table_association" "subnet_associations" {
 #   count = length(aws_subnet.lumifi_subnets)
 

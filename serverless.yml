@@ -54,6 +54,7 @@ plugins:
 
 functions:
   api:
+    name: ${self:service}-${sls:stage}-api
     handler: src/handler.hello
     events:
       - httpApi:

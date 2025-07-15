@@ -1,9 +1,10 @@
-# IAM policy for API Gateway to invoke Lambda
+# IAM permissions for API Gateway to invoke each Lambda
 resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
+  for_each = local.lambda_functions
+
+  statement_id  = "AllowAPIGatewayInvoke-${each.key}"
   action        = "lambda:InvokeFunction"
-#   function_name = "${terraform.workspace}-lumifi-api"
-  function_name = "serverless-express-app"
+  function_name = "serverless-express-app-${terraform.workspace}-${each.value}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
 }
