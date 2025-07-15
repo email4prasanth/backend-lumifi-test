@@ -1,0 +1,205 @@
+service: lumifi-sls
+
+frameworkVersion: '>=4.0.0'
+
+custom:
+  serverless-offline:
+    httpPort: 3001
+  dev: ${file(./env.yml):dev}
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  timeout: 29 # Max 900 seconds (15 minutes)
+  httpApi:
+    shouldStartNameWithService: true 
+    accessLogSettings:
+      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+
+  # To disable API Gateway creation
+  apiGateway:
+    disableDefaultEndpoint: false
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+          Resource: "arn:aws:logs:*:*:*"
+
+  logs:
+    httpApi: true
+
+  environment:
+    API_ROOT_PATH: ${self:custom.dev.API_ROOT_PATH}
+    JWT_SECRET: ${self:custom.dev.JWT_SECRET}
+    DB_HOST: ${self:custom.dev.DB_HOST}
+    DB_USER: ${self:custom.dev.DB_USER}
+    DB_PASSWORD: ${self:custom.dev.DB_PASSWORD}
+    DB_NAME: ${self:custom.dev.DB_NAME}
+    DB_PORT: ${self:custom.dev.DB_PORT}
+    PG_ENCRYPT_SECRET: ${self:custom.dev.PG_ENCRYPT_SECRET}
+    # AWS_ACCESS_KEY_ID: ${self:custom.dev.AWS_ACCESS_KEY_ID}
+    # AWS_SECRET_ACCESS_KEY: ${self:custom.dev.AWS_SECRET_ACCESS_KEY}
+    # AWS_REGION: ${self:custom.dev.AWS_REGION}
+    AWS_SES_SENDER_EMAIL: ${self:custom.dev.AWS_SES_SENDER_EMAIL}
+    FE_APP_URL: ${self:custom.dev.FE_APP_URL}
+
+plugins:
+  - serverless-offline
+
+functions:
+  api:
+    handler: src/handler.hello
+    events:
+      - httpApi:
+          path: /hello
+          method: GET
+
+  practiceHandlerFunction:
+    timeout: 29 # Max 900 seconds (15 minutes)
+    handler: src/handler.practiceHandler
+    events:
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/software
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/speciality
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/practice
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/register
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/update
+          method: PUT
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/practice/accountAdminAvailability
+          method: GET
+
+  userHandlerFunction:
+    timeout: 29 # Max 900 seconds (15 minutes)
+    handler: src/handler.userHandler
+    events:
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/user/role
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/user/list
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/user/detail
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/user/create
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/user/update
+          method: PUT
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/user/delete
+          method: DELETE
+
+  stateHandlerFunction:
+    timeout: 29 # Max 900 seconds (15 minutes)
+    handler: src/handler.stateHandler
+    events:
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/state/list
+          method: GET
+
+  authHandlerFunction:
+    timeout: 29 # Max 900 seconds (15 minutes)
+    handler: src/handler.authHandler
+    events:
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/login
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/selectLoginPracticeAccount
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/verifyOtp
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/completion
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/resendOtp
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/refreshToken
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/me
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/setPassword
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/forgotPassword
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/auth/resetPassword
+          method: POST
+
+  securityHandlerFunction:
+    timeout: 29 # Max 900 seconds (15 minutes)
+    handler: src/handler.securityHandler
+    events:
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/security/update
+          method: PUT
+
+  patientHandlerFunction:
+    timeout: 29 # Max 900 seconds (15 minutes)
+    handler: src/handler.patientHandler
+    events:
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/create
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/update
+          method: PUT
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/delete
+          method: DELETE
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/detail
+          method: GET
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/list
+          method: POST
+
+      - httpApi:
+          path: /${self:custom.dev.API_ROOT_PATH}/patient/search
+          method: POST
