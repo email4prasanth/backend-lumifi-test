@@ -108,32 +108,37 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
-      - name: Create env.yml
-        run: |
-          cat <<EOF > env.yml
-          $ENVIRONMENT:
-            DB_HOST: ${{ secrets.DB_HOST }}
-            DB_NAME: ${{ secrets.DB_NAME }}
-            DB_USER: ${{ secrets.DB_USER }}
-            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-            DB_PORT: ${{ secrets.DB_PORT }}
-            JWT_SECRET: ${{ secrets.JWT_SECRET }}
-            PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
-            AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
-            FE_APP_URL: ${{ secrets.FE_APP_URL }}
-            API_ROOT_PATH: ${API_ROOT_PATH}
-            # AWS_ACCESS_KEY_ID : ${{secrets.AWS_ACCESS_KEY_ID}}
-            # AWS_SECRET_ACCESS_KEY : ${{secrets.AWS_SECRET_ACCESS_KEY}}
-            # AWS_REGION: ${{secrets.AWS_REGION}}
-          EOF
+      # - name: Create env.yml
+      #   run: |
+      #     cat <<EOF > env.yml
+      #     $ENVIRONMENT:
+      #       DB_HOST: ${{ secrets.DB_HOST }}
+      #       DB_NAME: ${{ secrets.DB_NAME }}
+      #       DB_USER: ${{ secrets.DB_USER }}
+      #       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      #       DB_PORT: ${{ secrets.DB_PORT }}
+      #       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      #       PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
+      #       AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
+      #       FE_APP_URL: ${{ secrets.FE_APP_URL }}
+      #       API_ROOT_PATH: ${API_ROOT_PATH}
+      #       # AWS_ACCESS_KEY_ID : ${{secrets.AWS_ACCESS_KEY_ID}}
+      #       # AWS_SECRET_ACCESS_KEY : ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      #       # AWS_REGION: ${{secrets.AWS_REGION}}
+      #     EOF
 
-      - name: Deploy Serverless Application
-        run: |
-          # Set license key as environment variable
-          export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+      # - name: Deploy Serverless Application
+      #   run: |
+      #     # Set license key as environment variable
+      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           
-          # Deploy with license key
-          sls deploy --stage $ENVIRONMENT
+      #     # Deploy with license key
+      #     sls deploy --stage $ENVIRONMENT
+
+      - name: Destroy Serverless Resources
+        run: |
+          export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+          sls remove --stage $ENVIRONMENT
 
       # - name: Get Serverless Endpoint
       #   id: sls-info
