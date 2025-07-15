@@ -36,12 +36,12 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-      # Package Lambda function
-      - name: Package Lambda function
-        run: |
-          cd lambda
-          zip -r test_function.zip test_function.py
-          cd ..
+      # # Package Lambda function
+      # - name: Package Lambda function
+      #   run: |
+      #     cd lambda
+      #     zip -r test_function.zip test_function.py
+      #     cd ..
 
       # Deploy Terraform infrastructure
       - name: Set up Terraform
@@ -71,118 +71,118 @@ jobs:
       #   run: terraform output -json > outputs.json
       #   if: always()
 
-  deploy-serverless:
-    needs: aws-resources-deploy
-    runs-on: ubuntu-latest
-    env:
-      ENVIRONMENT: dev
-      AWS_REGION: us-east-1
-      API_ROOT_PATH: api/v1
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#   deploy-serverless:
+#     needs: aws-resources-deploy
+#     runs-on: ubuntu-latest
+#     env:
+#       ENVIRONMENT: dev
+#       AWS_REGION: us-east-1
+#       API_ROOT_PATH: api/v1
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        env:
-          AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
-        run: |
-          echo "$AWS_CREDENTIALS" > aws_credentials.json
-          AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-          AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
+#       - name: Configure AWS Credentials
+#         env:
+#           AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+#         run: |
+#           echo "$AWS_CREDENTIALS" > aws_credentials.json
+#           AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
+#           AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
           
-          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
+#           echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+#           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+#           echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 18
 
-      - name: Install dependencies
-        run: npm install
+#       - name: Install dependencies
+#         run: npm install
 
-      - name: Build TypeScript
-        run: npm run build  # Add "build": "tsc" to package.json scripts
+#       - name: Build TypeScript
+#         run: npm run build  # Add "build": "tsc" to package.json scripts
 
-      - name: Install Serverless Framework
-        run: npm install -g serverless@4.0.0
+#       - name: Install Serverless Framework
+#         run: npm install -g serverless@4.0.0
 
-      - name: Create env.yml
-        run: |
-          cat <<EOF > env.yml
-          $ENVIRONMENT:
-            DB_HOST: ${{ secrets.DB_HOST }}
-            DB_NAME: ${{ secrets.DB_NAME }}
-            DB_USER: ${{ secrets.DB_USER }}
-            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-            DB_PORT: ${{ secrets.DB_PORT }}
-            JWT_SECRET: ${{ secrets.JWT_SECRET }}
-            PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
-            AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
-            FE_APP_URL: ${{ secrets.FE_APP_URL }}
-            API_ROOT_PATH: ${API_ROOT_PATH}
-            # AWS_ACCESS_KEY_ID : ${{secrets.AWS_ACCESS_KEY_ID}}
-            # AWS_SECRET_ACCESS_KEY : ${{secrets.AWS_SECRET_ACCESS_KEY}}
-            # AWS_REGION: ${{secrets.AWS_REGION}}
-          EOF
+#       - name: Create env.yml
+#         run: |
+#           cat <<EOF > env.yml
+#           $ENVIRONMENT:
+#             DB_HOST: ${{ secrets.DB_HOST }}
+#             DB_NAME: ${{ secrets.DB_NAME }}
+#             DB_USER: ${{ secrets.DB_USER }}
+#             DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#             DB_PORT: ${{ secrets.DB_PORT }}
+#             JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#             PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
+#             AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
+#             FE_APP_URL: ${{ secrets.FE_APP_URL }}
+#             API_ROOT_PATH: ${API_ROOT_PATH}
+#             # AWS_ACCESS_KEY_ID : ${{secrets.AWS_ACCESS_KEY_ID}}
+#             # AWS_SECRET_ACCESS_KEY : ${{secrets.AWS_SECRET_ACCESS_KEY}}
+#             # AWS_REGION: ${{secrets.AWS_REGION}}
+#           EOF
 
-      - name: Deploy Serverless Application
-        run: |
-          # Set license key as environment variable
-          export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+#       - name: Deploy Serverless Application
+#         run: |
+#           # Set license key as environment variable
+#           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           
-          # Deploy with license key
-          sls deploy --stage $ENVIRONMENT
+#           # Deploy with license key
+#           sls deploy --stage $ENVIRONMENT
 
-      # - name: Destroy Serverless Resources
-      #   run: |
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-      #     sls remove --stage $ENVIRONMENT
+#       # - name: Destroy Serverless Resources
+#       #   run: |
+#       #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+#       #     sls remove --stage $ENVIRONMENT
 
-      # - name: Get Serverless Endpoint
-      #   id: sls-info
-      #   run: |
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-      #     ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
-      #     echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
+#       # - name: Get Serverless Endpoint
+#       #   id: sls-info
+#       #   run: |
+#       #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+#       #     ENDPOINT=$(sls info --stage $ENVIRONMENT | grep "ServiceEndpoint" | cut -d" " -f2)
+#       #     echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
 
-      # - name: Show API Endpoint
-      #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+#       # - name: Show API Endpoint
+#       #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v3
 
-      - name: Update API Gateway Integrations
-        working-directory: backend-infra
-        run: |
-          terraform init -reconfigure
-      - name: Select/Create Workspace
-        working-directory: backend-infra
-        run: |
-          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
-
-      - name: Terraform Validate
-        working-directory: backend-infra
-        run: terraform validate
-
-      - name: Terraform Apply
-        working-directory: backend-infra
-        run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
-
-      # - name: Get API Gateway URL
-      #   id: output
-      #   run: |
-      #     API_URL=$(terraform output -raw api_url)
-      #     SERVERLESS_API_URL=$(terraform output -raw serverless_api_url)
-      #     echo "api_url=$API_URL" >> $GITHUB_OUTPUT
-      #     echo "serverless_api_url=$SERVERLESS_API_URL" >> $GITHUB_OUTPUT
-
-      # - name: Show API Endpoints
-      #   run: |
-      #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
-      #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
-
-# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-#       - name: Terraform Destroy
+#       - name: Update API Gateway Integrations
 #         working-directory: backend-infra
-#         run: terraform destroy -auto-approve
+#         run: |
+#           terraform init -reconfigure
+#       - name: Select/Create Workspace
+#         working-directory: backend-infra
+#         run: |
+#           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+
+#       - name: Terraform Validate
+#         working-directory: backend-infra
+#         run: terraform validate
+
+#       - name: Terraform Apply
+#         working-directory: backend-infra
+#         run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
+
+#       # - name: Get API Gateway URL
+#       #   id: output
+#       #   run: |
+#       #     API_URL=$(terraform output -raw api_url)
+#       #     SERVERLESS_API_URL=$(terraform output -raw serverless_api_url)
+#       #     echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+#       #     echo "serverless_api_url=$SERVERLESS_API_URL" >> $GITHUB_OUTPUT
+
+#       # - name: Show API Endpoints
+#       #   run: |
+#       #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
+#       #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
+
+# # # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+# #       - name: Terraform Destroy
+# #         working-directory: backend-infra
+# #         run: terraform destroy -auto-approve
