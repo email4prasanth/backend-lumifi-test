@@ -67,12 +67,12 @@ jobs:
           echo "Parsed DB_PORT: $DB_PORT"
           
           # Set outputs - ADD TRIM AND VALIDATION
-          echo "db_host=$DB_HOST" >> $GITHUB_ENV
-          echo "db_port=$DB_PORT" >> $GITHUB_ENV
+          echo "db_host=$DB_HOST" >> $GITHUB_OUTPUT
+          echo "db_port=$DB_PORT" >> $GITHUB_OUTPUT
 
-          echo "GITHUB_ENV contents:"
-          cat $GITHUB_ENV
-          echo "--- End of GITHUB_ENV ---"
+          echo "GITHUB_OUTPUT contents:"
+          cat $GITHUB_OUTPUT
+          echo "--- End of GITHUB_OUTPUT ---"
 
   deploy-serverless:
     needs: aws-resources-deploy
@@ -92,21 +92,37 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
-      # Debug outputs before using them
-      - name: Debug outputs from previous job
-        run: |
-          echo "db_host from previous job: '${{ env.db_host}}'"
-          echo "db_port from previous job: '${{ env.db_port }}'"
 
-      # Set DB host/port from previous job WITH VALIDATION
-      - name: Set database connection info
+      - name: Validate and use outputs
         run: |
-          if [ -z "${{ needs.aws-resources-deploy.outputs.db_host }}" ]; then
-            echo "ERROR: db_host is empty!"
-            exit 1
-          fi
+          # Access outputs directly
+          echo "Using DB_HOST: ${{ needs.aws-resources-deploy.outputs.db_host }}"
           echo "DB_HOST=${{ needs.aws-resources-deploy.outputs.db_host }}" >> $GITHUB_ENV
           echo "DB_PORT=${{ needs.aws-resources-deploy.outputs.db_port }}" >> $GITHUB_ENV
+
+      - name: Retrieve Secrets
+        run: |
+          # REMOVE DB_HOST/DB_PORT from here - they're already set
+          ...
+          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+
+      # # Debug outputs before using them
+      # - name: Debug outputs from previous job
+      #   run: |
+      #     echo "db_host: '${{ needs.aws-resources-deploy.outputs.db_host }}'"
+      #     echo "db_port: '${{ needs.aws-resources-deploy.outputs.db_port }}'"
+
+      # # Set DB host/port from previous job WITH VALIDATION
+      # - name: Set database connection info
+      #   run: |
+      #     if [ -z "${{ needs.aws-resources-deploy.outputs.db_host }}" ]; then
+      #       echo "ERROR: db_host is empty!"
+      #       exit 1
+      #     fi
+      #     echo "DB_HOST=${{ needs.aws-resources-deploy.outputs.db_host }}" >> $GITHUB_ENV
+      #     echo "DB_PORT=${{ needs.aws-resources-deploy.outputs.db_port }}" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
