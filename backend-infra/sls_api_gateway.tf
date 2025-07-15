@@ -12,18 +12,6 @@ resource "aws_apigatewayv2_stage" "default" {
   auto_deploy = true
 }
 
-# Integration for each Lambda function
-locals {
-  lambda_functions = {
-    security  = "securityHandlerFunction"
-    state     = "stateHandlerFunction"
-    api       = "api"
-    patient   = "patientHandlerFunction"
-    user      = "userHandlerFunction"
-    practice  = "practiceHandlerFunction"
-    auth      = "authHandlerFunction"
-  }
-}
 
 # Create integrations
 resource "aws_apigatewayv2_integration" "lambda" {
