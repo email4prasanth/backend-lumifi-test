@@ -114,7 +114,7 @@ export const hello = async () => {
   try {
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Hello from Serverless!' }),
+      body: JSON.stringify({ message: 'Hello from Serverless testing second time!' }),
     };
   } catch (error) {
     console.error('Error in hello handler:', error);
