@@ -27,11 +27,11 @@ jobs:
 
       # Configure AWS credentials
       - name: Configure AWS Credentials
-        env:
-          # AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ env.AWS_REGION }}" >> $GITHUB_ENV
+          
           # echo "$AWS_CREDENTIALS" > aws_credentials.json
           # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
           # AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
@@ -93,12 +93,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Configure AWS credentials
       - name: Configure AWS Credentials
-        env:
-          # AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ env.AWS_REGION }}" >> $GITHUB_ENV
+
           # echo "$AWS_CREDENTIALS" > aws_credentials.json
           # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
           # AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
