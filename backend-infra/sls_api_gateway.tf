@@ -10,18 +10,6 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.main.id
   name        = "$default"
   auto_deploy = true
-  # access_log_settings {
-  #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
-  #   format = jsonencode({
-  #     requestId        = "$context.requestId"
-  #     ip               = "$context.identity.sourceIp"
-  #     requestTime      = "$context.requestTime"
-  #     httpMethod       = "$context.httpMethod"
-  #     routeKey         = "$context.routeKey"
-  #     status           = "$context.status"
-  #     integrationError = "$context.integrationErrorMessage"
-  #   })
-  # }
 }
 
 
@@ -41,8 +29,7 @@ resource "aws_apigatewayv2_route" "api_v1_routes" {
     # Map route keys to Lambda functions
     "ANY /api/v1/security/{proxy+}" = "security"
     "ANY /api/v1/state/{proxy+}"    = "state"
-    # "ANY /api/v1/hello"             = "api"
-    "GET /api/v1/hello" = "api"
+    "ANY /api/v1/hello"             = "api"
     "ANY /api/v1/patient/{proxy+}"  = "patient"
     "ANY /api/v1/user/{proxy+}"     = "user"
     "ANY /api/v1/practice/{proxy+}" = "practice"
