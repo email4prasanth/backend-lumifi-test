@@ -165,17 +165,17 @@ jobs:
 
       # - name: Show API Endpoint
       #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
-      # - name: Set up Terraform
-      #   uses: hashicorp/setup-terraform@v3
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      # - name: Update API Gateway Integrations
-      #   working-directory: backend-infra
-      #   run: |
-      #     terraform init -reconfigure
-      # - name: Select/Create Workspace
-      #   working-directory: backend-infra
-      #   run: |
-      #     terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+      - name: Update API Gateway Integrations
+        working-directory: backend-infra
+        run: |
+          terraform init -reconfigure
+      - name: Select/Create Workspace
+        working-directory: backend-infra
+        run: |
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
       # - name: Terraform Validate
       #   working-directory: backend-infra
@@ -201,4 +201,4 @@ jobs:
 # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
       - name: Terraform Destroy
         working-directory: backend-infra
-        run: terraform destroy --auto-approve
+        run: terraform destroy -auto-approve
