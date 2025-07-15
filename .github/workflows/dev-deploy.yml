@@ -66,7 +66,9 @@ jobs:
           echo "Parsed DB_HOST: $DB_HOST"
           echo "Parsed DB_PORT: $DB_PORT"
           
-          # Set outputs
+          # Set outputs - ADD TRIM AND VALIDATION
+          DB_HOST=$(echo $DB_HOST | xargs)  # Trim whitespace
+          DB_PORT=$(echo $DB_PORT | xargs)  # Trim whitespace
           echo "db_host=$DB_HOST" >> $GITHUB_OUTPUT
           echo "db_port=$DB_PORT" >> $GITHUB_OUTPUT
 
@@ -88,9 +90,19 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
-      # Set DB host/port from previous job
+      # Debug outputs before using them
+      - name: Debug outputs from previous job
+        run: |
+          echo "db_host from previous job: '${{ needs.aws-resources-deploy.outputs.db_host }}'"
+          echo "db_port from previous job: '${{ needs.aws-resources-deploy.outputs.db_port }}'"
+
+      # Set DB host/port from previous job WITH VALIDATION
       - name: Set database connection info
         run: |
+          if [ -z "${{ needs.aws-resources-deploy.outputs.db_host }}" ]; then
+            echo "ERROR: db_host is empty!"
+            exit 1
+          fi
           echo "DB_HOST=${{ needs.aws-resources-deploy.outputs.db_host }}" >> $GITHUB_ENV
           echo "DB_PORT=${{ needs.aws-resources-deploy.outputs.db_port }}" >> $GITHUB_ENV
 
