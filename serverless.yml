@@ -19,7 +19,7 @@ provider:
 
   # To disable API Gateway creation
   apiGateway:
-    disableDefaultEndpoint: true
+    disableDefaultEndpoint: false
 
   iam:
     role:
