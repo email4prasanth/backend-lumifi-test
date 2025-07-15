@@ -164,13 +164,8 @@ jobs:
           DB_NAME=$(jq -r '.db_name' secret.json)
           DB_USER=$(jq -r '.db_user' secret.json)
           DB_PASSWORD=$(jq -r '.db_password' secret.json)
-          DB_PORT=$(jq -r '.db_port' secret.json)
-
-          # Use RDS port from Terraform output instead of secret
-          DB_PORT=${{ needs.aws-resources-deploy.outputs.db_port }}
           
           # Log non-sensitive values
-          echo "DB_HOST: ${{ needs.aws-resources-deploy.outputs.db_host }}"
           echo "DB_NAME: $DB_NAME"
           echo "DB_USER: $DB_USER"
           echo "DB_PORT: $DB_PORT"
