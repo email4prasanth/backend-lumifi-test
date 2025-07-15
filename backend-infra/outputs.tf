@@ -9,7 +9,7 @@ output "subnet_ids" {
 
 # Example Terraform outputs
 output "rds_endpoint" {
-  value = aws_db_instance.main.endpoint
+  value = aws_db_instance.postgres.endpoint
 }
 
 resource "aws_secretsmanager_secret" "backend_secrets" {
@@ -19,9 +19,10 @@ resource "aws_secretsmanager_secret" "backend_secrets" {
 resource "aws_secretsmanager_secret_version" "backend_secrets" {
   secret_id = aws_secretsmanager_secret.backend_secrets.id
   secret_string = jsonencode({
-    db_name     = aws_db_instance.main.name
-    db_user     = aws_db_instance.main.username
-    db_password = aws_db_instance.main.password
-    db_port     = aws_db_instance.main.port
+    db_name     = aws_db_instance.postgres.db_name
+    db_user     = aws_db_instance.postgres.username
+    db_password = random_password.db_admin_password.result
+    db_port     = 5432
+    db_endpoint = aws_db_instance.postgres.endpoint
   })
 }
