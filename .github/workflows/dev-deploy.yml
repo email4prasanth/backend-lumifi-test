@@ -28,7 +28,9 @@ jobs:
       # Configure AWS credentials
       - name: Configure AWS Credentials
         env:
-          AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+          # AWS_CREDENTIALS: ${{ secrets.AWS_CREDENTIALS }}
+          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
         run: |
           # echo "$AWS_CREDENTIALS" > aws_credentials.json
           # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
@@ -38,8 +40,8 @@ jobs:
           # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-          echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+          # echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+          # echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
 
 
       # Deploy Terraform infrastructure
@@ -103,8 +105,8 @@ jobs:
           # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
 
-          echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+          # echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
+          # echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
 
 
       - name: Setup Node.js
