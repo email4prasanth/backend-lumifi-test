@@ -88,14 +88,6 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
-          # echo "$AWS_CREDENTIALS" > aws_credentials.json
-          # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-          # AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
-          
-          # echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -152,11 +144,13 @@ jobs:
           
           # Log non-sensitive values
           echo "DB_HOST: ${{ needs.aws-resources-deploy.outputs.db_host }}"
+          echo "DB_USER: $DB_USER"
           echo "DB_NAME: $DB_NAME"
           echo "DB_USER: $DB_USER"
           echo "DB_PORT: $DB_PORT"
           
           # Set environment variables
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
           echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
           echo "DB_USER=$DB_USER" >> $GITHUB_ENV
           echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
