@@ -117,6 +117,9 @@ jobs:
       - name: Build TypeScript
         run: npm run build  # Add "build": "tsc" to package.json scripts
 
+      # - name: Verify build output
+      #   run: ls -la dist/  # Ensure files exist
+
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
@@ -158,17 +161,17 @@ jobs:
 
       # - name: Show API Endpoint
       #   run: echo "Serverless API Endpoint is ${{ steps.sls-info.outputs.endpoint }}"
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v3
 
-      - name: Update API Gateway Integrations
-        working-directory: backend-infra
-        run: |
-          terraform init -reconfigure
-      - name: Select/Create Workspace
-        working-directory: backend-infra
-        run: |
-          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+      # - name: Update API Gateway Integrations
+      #   working-directory: backend-infra
+      #   run: |
+      #     terraform init -reconfigure
+      # - name: Select/Create Workspace
+      #   working-directory: backend-infra
+      #   run: |
+      #     terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
       # - name: Terraform Validate
       #   working-directory: backend-infra
@@ -191,7 +194,7 @@ jobs:
       #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
       #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
 
-# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-      - name: Terraform Destroy
-        working-directory: backend-infra
-        run: terraform destroy -auto-approve
+# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+#       - name: Terraform Destroy
+#         working-directory: backend-infra
+#         run: terraform destroy -auto-approve
