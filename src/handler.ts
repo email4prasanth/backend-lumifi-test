@@ -114,7 +114,7 @@ export const hello = async () => {
   try {
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Hello from Serverless testing second time!' }),
+      body: JSON.stringify({ message: 'Testing lumifi Serverless third time!' }),
     };
   } catch (error) {
     console.error('Error in hello handler:', error);
