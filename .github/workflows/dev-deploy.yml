@@ -30,19 +30,7 @@ jobs:
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=${{ env.AWS_REGION }}" >> $GITHUB_ENV
-          
-          # echo "$AWS_CREDENTIALS" > aws_credentials.json
-          # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
-          # AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' aws_credentials.json)
-          
-          # echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
-
-          # echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
-          # echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
-
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
       # Deploy Terraform infrastructure
       - name: Set up Terraform
@@ -98,7 +86,7 @@ jobs:
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=${{ env.AWS_REGION }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
           # echo "$AWS_CREDENTIALS" > aws_credentials.json
           # AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' aws_credentials.json)
@@ -107,10 +95,6 @@ jobs:
           # echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
           # echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           # echo "AWS_DEFAULT_REGION=$AWS_REGION" >> $GITHUB_ENV
-
-          # echo "AWS_ACCESS_KEY_ID=$(jq -r '.aws_access_key_id' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
-          # echo "AWS_SECRET_ACCESS_KEY=$(jq -r '.aws_secret_access_key' <<< "${{ secrets.AWS_CREDENTIALS }}")" >> $GITHUB_ENV
-
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
