@@ -1,80 +1,3 @@
-# ### File: api-lambdatest.tf ###
-# resource "aws_apigatewayv2_api" "lambda1_api" {
-#   name          = "${local.project_name.name}-${terraform.workspace}-api"
-#   protocol_type = "HTTP"
-#   tags          = merge(local.tags, local.project_name)
-# }
-
-# resource "aws_apigatewayv2_stage" "lambda1_api" {
-#   api_id      = aws_apigatewayv2_api.lambda1_api.id
-#   name        = "$default"
-#   auto_deploy = true
-# }
-
-# resource "aws_apigatewayv2_integration" "lambda_test" {
-#   api_id             = aws_apigatewayv2_api.lambda1_api.id
-#   integration_type   = "AWS_PROXY"
-#   integration_method = "POST"
-#   integration_uri    = aws_lambda_function.test_function.invoke_arn
-# }
-
-# resource "aws_apigatewayv2_route" "test" {
-#   api_id    = aws_apigatewayv2_api.lambda1_api.id
-#   route_key = "GET /test"
-#   target    = "integrations/${aws_apigatewayv2_integration.lambda_test.id}"
-# }
-
-# resource "aws_lambda_permission" "api_gw" {
-#   statement_id  = "AllowExecutionFromAPIGateway"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.test_function.function_name
-#   principal     = "apigateway.amazonaws.com"
-#   source_arn    = "${aws_apigatewayv2_api.lambda1_api.execution_arn}/*/*"
-# }
-
-
-
-
-
-# ### File: api-serverless.tf ###
-# # Create a new API Gateway for serverless functions
-# resource "aws_apigatewayv2_api" "serverless_api" {
-#   name          = "${local.project_name.name}-${terraform.workspace}-serverless-api"
-#   protocol_type = "HTTP"
-#   tags          = merge(local.tags, local.project_name)
-# }
-
-# resource "aws_apigatewayv2_stage" "serverless_api" {
-#   api_id      = aws_apigatewayv2_api.serverless_api.id
-#   name        = "$default"
-#   auto_deploy = true
-# }
-
-# # Create a wildcard integration for /api/v1/*
-# resource "aws_apigatewayv2_integration" "serverless_root" {
-#   api_id             = aws_apigatewayv2_api.serverless_api.id
-#   integration_type   = "AWS_PROXY"
-#   integration_method = "POST"
-#   integration_uri    = "arn:aws:apigateway:${local.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${local.aws_region}:${data.aws_caller_identity.current.account_id}:function:serverless-express-app-dev-api/invocations"
-# }
-
-# # Create a catch-all route for /api/v1/*
-# resource "aws_apigatewayv2_route" "api_v1_proxy" {
-#   api_id    = aws_apigatewayv2_api.serverless_api.id
-#   route_key = "ANY /api/v1/{proxy+}"
-#   target    = "integrations/${aws_apigatewayv2_integration.serverless_root.id}"
-# }
-
-# # Grant API Gateway permission to invoke the Lambda
-# resource "aws_lambda_permission" "serverless_api_gw" {
-#   statement_id  = "AllowServerlessAPIGatewayInvoke"
-#   action        = "lambda:InvokeFunction"
-#   function_name = "serverless-express-app-dev-api"
-#   principal     = "apigateway.amazonaws.com"
-#   source_arn    = "${aws_apigatewayv2_api.serverless_api.execution_arn}/*/*"
-# }
-
-
 # ### File: backend.tf ###
 # # Terraform Remote Backend Configuration - S3 for backend code 
 # terraform {
@@ -118,25 +41,6 @@
 # resource "aws_iam_role_policy_attachment" "lambda_s3_access" {
 #   role       = aws_iam_role.lambda_role.name
 #   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-# }
-
-
-# ### File: lambda-test.tf ###
-# data "archive_file" "lambda_test_zip" {
-#   type        = "zip"
-#   source_file = "${path.module}/lambda/test_function.py"
-#   output_path = "${path.module}/lambda/test_function.zip"
-# }
-
-# resource "aws_lambda_function" "test_function" {
-#   filename         = data.archive_file.lambda_test_zip.output_path
-#   function_name    = "${local.project_name.name}-${terraform.workspace}-test"
-#   role             = aws_iam_role.lambda_role.arn
-#   handler          = "test_function.lambda_handler"
-#   runtime          = "python3.12"
-#   source_code_hash = data.archive_file.lambda_test_zip.output_base64sha256
-
-#   tags = merge(local.tags, local.project_name)
 # }
 
 
@@ -267,25 +171,6 @@
 
 
 
-# ### File: outputs.tf ###
-# output "api_url" {
-#   value = "${aws_apigatewayv2_api.lambda1_api.api_endpoint}/test"
-# }
-
-# output "serverless_api_url" {
-#   value = aws_apigatewayv2_api.serverless_api.api_endpoint
-# }
-
-# # Add these outputs
-# output "api_gateway_id" {
-#   value = aws_apigatewayv2_api.lambda1_api.id
-# }
-
-# output "api_gateway_execution_arn" {
-#   value = aws_apigatewayv2_api.lambda1_api.execution_arn
-# }
-
-
 # ### File: providers.tf ###
 # # Add this data source
 # data "aws_caller_identity" "current" {}
@@ -302,7 +187,7 @@
 # # AWS Provider Configuration
 # provider "aws" {
 #   region  = local.aws_region
-# #   profile = "lumifitest"
+#   # profile = "lumifitest"
 # }
 
 

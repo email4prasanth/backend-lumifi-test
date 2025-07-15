@@ -4,7 +4,7 @@ name: Deploy lumifi backend Infrastructure to devevelopment environmnet
 on:
   push:
     branches:
-      - develop
+      - develop-sls
       
 permissions:
   contents: read
@@ -54,14 +54,14 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      # - name: Terraform Validate
-      #   run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-      # - name: Terraform Plan
-      #   run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
       # - name: Extract API Gateway URL
       #   id: output
@@ -127,18 +127,18 @@ jobs:
             # AWS_REGION: ${{secrets.AWS_REGION}}
           EOF
 
-      # - name: Deploy Serverless Application
-      #   run: |
-      #     # Set license key as environment variable
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-          
-      #     # Deploy with license key
-      #     sls deploy --stage $ENVIRONMENT
-
-      - name: Destroy Serverless Resources
+      - name: Deploy Serverless Application
         run: |
+          # Set license key as environment variable
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-          sls remove --stage $ENVIRONMENT
+          
+          # Deploy with license key
+          sls deploy --stage $ENVIRONMENT
+
+      # - name: Destroy Serverless Resources
+      #   run: |
+      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+      #     sls remove --stage $ENVIRONMENT
 
       # - name: Get Serverless Endpoint
       #   id: sls-info
@@ -161,13 +161,13 @@ jobs:
         run: |
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      # - name: Terraform Validate
-      #   working-directory: backend-infra
-      #   run: terraform validate
+      - name: Terraform Validate
+        working-directory: backend-infra
+        run: terraform validate
 
-      # - name: Terraform Apply
-      #   working-directory: backend-infra
-      #   run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
+      - name: Terraform Apply
+        working-directory: backend-infra
+        run: terraform apply -auto-approve -target=aws_apigatewayv2_route.api_v1_proxy
 
       # - name: Get API Gateway URL
       #   id: output
@@ -182,7 +182,7 @@ jobs:
       #     echo "Test API URL: ${{ steps.output.outputs.api_url }}"
       #     echo "Serverless API URL: ${{ steps.output.outputs.serverless_api_url }}"
 
-# Destroy the entire infrastructure comment Terraform plan and Terraform Apply
-      - name: Terraform Destroy
-        working-directory: backend-infra
-        run: terraform destroy -auto-approve
+# # Destroy the entire infrastructure comment Terraform plan and Terraform Apply
+#       - name: Terraform Destroy
+#         working-directory: backend-infra
+#         run: terraform destroy -auto-approve
