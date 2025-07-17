@@ -234,6 +234,31 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Select Workspace
+        run: terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+
+      # Get and parse RDS endpoint seperate endpoint and port
+      - name: Get and Parse RDS Endpoint
+        id: set-db-outputs
+        run: |
+          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
+          echo "Full RDS Endpoint: $DB_ENDPOINT_FULL"
+          
+          # Extract host and port
+          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
+          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          
+          # Create outputs file in the working directory
+          echo "DB_HOST=$DB_HOST" >> db_outputs.env
+          echo "DB_PORT=$DB_PORT" >> db_outputs.env
+
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -244,24 +269,6 @@ jobs:
 
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
-
-      - name: Download DB outputs
-        uses: actions/download-artifact@v4
-        with:
-          name: db-env-vars
-          path: ./
-
-      - name: Load DB variables
-        run: |
-          # Load variables from file
-          source ./db_outputs.env
-          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
-          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
-
-      - name: Use the variables
-        run: |
-          echo "Using DB host: $DB_HOST"
-          echo "Using DB port: $DB_PORT"
 
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
