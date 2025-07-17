@@ -150,7 +150,7 @@ jobs:
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
         run: |
-          SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v1"
+          SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v2"
           echo "Retrieving secrets from: $SECRET_NAME"
           SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET_NAME --query ARN --output text)
           echo "Secret ARN: $SECRET_ARN"
