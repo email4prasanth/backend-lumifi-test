@@ -222,6 +222,7 @@ jobs:
     env:
       ENVIRONMENT: dev
       AWS_REGION: us-east-1
+      API_ROOT_PATH: api/v1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -297,3 +298,7 @@ jobs:
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
+
+      - name: Remove secretes folder
+        run: |
+          aws secretsmanager delete-secret --secret-id dev-lumifi-rds_credentials-backend-v1 --force-delete-without-recovery
