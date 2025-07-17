@@ -245,6 +245,55 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
+      - name: Download DB outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: db-env-vars
+          path: ./
+
+      - name: Load DB variables
+        run: |
+          # Load variables from file
+          source ./db_outputs.env
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+
+      - name: Use the variables
+        run: |
+          echo "Using DB host: $DB_HOST"
+          echo "Using DB port: $DB_PORT"
+
+      - name: Retrieve Secrets from AWS Secrets Manager
+        id: get-secrets
+        run: |
+          SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v1"
+          echo "Retrieving secrets from: $SECRET_NAME"
+          SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET_NAME --query ARN --output text)
+          echo "Secret ARN: $SECRET_ARN"
+          
+          # Retrieve secret value
+          SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+          echo "Raw secret value retrieved"
+          echo "$SECRET_VALUE" > secret.json
+          
+          # Parse values
+          DB_NAME=$(jq -r '.db_name' secret.json)
+          DB_USER=$(jq -r '.db_user' secret.json)
+          DB_PASSWORD=$(jq -r '.db_password' secret.json)
+          
+          # Log non-sensitive values
+          echo "DB_NAME: $DB_NAME"
+          echo "DB_USER: $DB_USER"
+          echo "DB_PORT: $DB_PORT"
+
+          # Set environment variables
+          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+          echo "JWT_SECRET=$JWT_SECRET" >> $GITHUB_ENV
+          echo "PG_ENCRYPT_SECRET=$PG_ENCRYPT_SECRET" >> $GITHUB_ENV
+
       - name: Create env.yml
         run: |
           cat <<EOF > env.yml
@@ -261,6 +310,10 @@ jobs:
             FE_APP_URL: ${{ secrets.FE_APP_URL }}
             API_ROOT_PATH: ${API_ROOT_PATH}
           EOF
+          
+          # Show non-sensitive parts of env.yml
+          echo "env.yml contents (redacted):"
+          grep -v -E 'DB_PASSWORD|JWT_SECRET|PG_ENCRYPT_SECRET' env.yml
 
       - name: Destroy Serverless Resources
         run: |
