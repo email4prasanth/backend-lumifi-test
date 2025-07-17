@@ -219,6 +219,9 @@ permissions:
 jobs:
   destroy-serverless:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-infra
     env:
       ENVIRONMENT: dev
       AWS_REGION: us-east-1
