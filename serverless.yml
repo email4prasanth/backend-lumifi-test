@@ -26,7 +26,6 @@ provider:
   apiGateway:
     disableDefaultEndpoint: false
     regional: true
-    regionalEndpoint: true
 
   iam:
     role:
