@@ -229,6 +229,10 @@ jobs:
         with:
           node-version: 18
 
+      # Install ALL dependencies including devDependencies
+      - name: Install dependencies
+        run: npm install
+
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
       - name: Retrieve Secrets from AWS Secrets Manager
