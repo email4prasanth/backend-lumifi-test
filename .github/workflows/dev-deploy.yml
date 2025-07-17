@@ -267,6 +267,16 @@ jobs:
           echo "DB_HOST=$DB_HOST" >> db_outputs.env
           echo "DB_PORT=$DB_PORT" >> db_outputs.env
 
+          # Mask values in logs
+          echo "::add-mask::$DB_HOST"
+          echo "::add-mask::$DB_PORT"
+
+      - name: Upload DB outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-env-vars
+          path: backend-infra/db_outputs.env  # Correct path to file
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -278,6 +288,24 @@ jobs:
 
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
+
+      - name: Download DB outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: db-env-vars
+          path: ./
+
+      - name: Load DB variables
+        run: |
+          # Load variables from file
+          source ./db_outputs.env
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+
+      - name: Use the variables
+        run: |
+          echo "Using DB host: $DB_HOST"
+          echo "Using DB port: $DB_PORT"
 
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
