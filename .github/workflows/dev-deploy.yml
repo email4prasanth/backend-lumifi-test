@@ -236,6 +236,17 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+ 
+      # Install Node.js and dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Install project dependencies including serverless plugins
+      - name: Install dependencies
+        run: npm install
 
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
