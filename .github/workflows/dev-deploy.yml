@@ -243,11 +243,11 @@ jobs:
       - name: Select Workspace
         run: terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        
+      # - name: Terraform Plan
+      #   run: terraform plan
+
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve
 
       # Get and parse RDS endpoint seperate endpoint and port
       - name: Get and Parse RDS Endpoint
