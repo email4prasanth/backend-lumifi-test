@@ -25,6 +25,9 @@ jobs:
     outputs:
       db_host: ${{ steps.set-db-outputs.outputs.db_host }}
       db_port: ${{ steps.set-db-outputs.outputs.db_port }}
+
+      lambda_sg_id: ${{ steps.set-vpc-outputs.outputs.lambda_sg_id }}
+      subnet_ids: ${{ steps.set-vpc-outputs.outputs.subnet_ids }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -186,6 +189,10 @@ jobs:
       - name: Set VPC outputs
         id: vpc-outputs
         run: |
+
+          lambda_sg_id=$(terraform output -raw lambda_sg_id)
+          subnet_ids=$(terraform output -raw subnet_ids)
+
           echo "lambda_sg_id=$(terraform output -raw lambda_sg_id)" >> $GITHUB_OUTPUT
           echo "subnet_ids=$(terraform output -raw subnet_ids | jq -r 'join(\",\")')" >> $GITHUB_OUTPUT
 

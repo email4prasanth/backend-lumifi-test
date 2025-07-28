@@ -11,3 +11,4 @@ output "subnet_ids" {
 output "rds_endpoint" {
   value = aws_db_instance.postgres.endpoint
 }
+
