@@ -6,7 +6,7 @@ name: Deploy lumifi backend Infrastructure to development environment
 on:
   push:
     branches:
-      - develop-sls-devprod-test
+      - develop-sls-dbconnect
       
 permissions:
   contents: read
@@ -228,7 +228,7 @@ jobs:
 # on:
 #   push:
 #     branches:
-#       - develop-sls-devprod
+#       - develop-sls-dbconnect
       
 # permissions:
 #   contents: read
