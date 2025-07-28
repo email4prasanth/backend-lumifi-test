@@ -14,6 +14,17 @@ resource "aws_db_subnet_group" "public_db" {
   })
 }
 
+# Parameter Group to enforce SSL
+resource "aws_db_parameter_group" "lumifi_pg" {
+  name   = "${terraform.workspace}-lumifi-pg"
+  family = "postgres15"
+
+  parameter {
+    name  = "rds.force_ssl"
+    value = "1"
+  }
+}
+
 # PostgreSQL RDS Instance
 resource "aws_db_instance" "postgres" {
   identifier        = "${terraform.workspace}-lumifi-db"
@@ -29,7 +40,8 @@ resource "aws_db_instance" "postgres" {
   db_name                = "${terraform.workspace}_lumifi"
   username               = "dbadmin"
   password               = random_password.db_admin_password.result
-  parameter_group_name   = "default.postgres15"
+  # parameter_group_name   = "default.postgres15"
+  parameter_group_name   = aws_db_parameter_group.lumifi_pg.name
   skip_final_snapshot    = terraform.workspace == "dev" ? true : false
   vpc_security_group_ids = [aws_security_group.rds.id]
   db_subnet_group_name   = aws_db_subnet_group.public_db.name

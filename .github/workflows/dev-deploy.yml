@@ -1,215 +1,88 @@
+  ####################################################################
+  # INFRASTRUCTURE CREATION (UNCOMMENT THIS SECTION WHEN DEPLOYING)
+  ####################################################################
 name: Deploy lumifi backend Infrastructure to development environment
 
 on:
   push:
     branches:
-      - develop-sls-devprod
+      - develop-sls-devprod-test
       
 permissions:
   contents: read
   id-token: write
 
 jobs:
-  # ####################################################################
-  # # INFRASTRUCTURE CREATION (UNCOMMENT THIS SECTION WHEN DEPLOYING)
-  # ####################################################################
-  # aws-resources-deploy:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: backend-infra
-  #   env:
-  #     ENVIRONMENT: dev
-  #     AWS_REGION: us-east-1
-  #   outputs:
-  #     db_host: ${{ steps.set-db-outputs.outputs.db_host }}
-  #     db_port: ${{ steps.set-db-outputs.outputs.db_port }}
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
 
-  #     # Configure AWS credentials
-  #     - name: Configure AWS Credentials
-  #       run: |
-  #         echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-  #         echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-  #         # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+  aws-resources-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-infra
+    env:
+      ENVIRONMENT: dev
+      AWS_REGION: us-east-1
+    outputs:
+      db_host: ${{ steps.set-db-outputs.outputs.db_host }}
+      db_port: ${{ steps.set-db-outputs.outputs.db_port }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     # Deploy Terraform infrastructure
-  #     - name: Set up Terraform
-  #       uses: hashicorp/setup-terraform@v3
+      # Configure AWS credentials
+      - name: Configure AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
-  #     - name: Terraform Init
-  #       run: terraform init -reconfigure
+      # Deploy Terraform infrastructure
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
 
-  #     - name: Select/Create Workspace
-  #       run: |
-  #         terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+      - name: Terraform Init
+        run: terraform init -reconfigure
 
-  #     - name: Terraform Validate
-  #       run: terraform validate
+      - name: Select/Create Workspace
+        run: |
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
 
-  #     - name: Terraform Plan
-  #       run: terraform plan -out=tfplan
+      - name: Terraform Validate
+        run: terraform validate
 
-  #     - name: Terraform Apply
-  #       run: terraform apply -auto-approve tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-  #     # Get and parse RDS endpoint seperate endpoint and port
-  #     - name: Get and Parse RDS Endpoint
-  #       id: set-db-outputs
-  #       run: |
-  #         DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
-  #         echo "Full RDS Endpoint: $DB_ENDPOINT_FULL"
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      # Get and parse RDS endpoint seperate endpoint and port
+      - name: Get and Parse RDS Endpoint
+        id: set-db-outputs
+        run: |
+          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
+          echo "Full RDS Endpoint: $DB_ENDPOINT_FULL"
           
-  #         # Extract host and port
-  #         DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
-  #         DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          # Extract host and port
+          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
+          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
           
-  #         # Create outputs file in the working directory
-  #         echo "DB_HOST=$DB_HOST" >> db_outputs.env
-  #         echo "DB_PORT=$DB_PORT" >> db_outputs.env
+          # Create outputs file in the working directory
+          echo "DB_HOST=$DB_HOST" >> db_outputs.env
+          echo "DB_PORT=$DB_PORT" >> db_outputs.env
           
-  #         # Mask values in logs
-  #         echo "::add-mask::$DB_HOST"
-  #         echo "::add-mask::$DB_PORT"
+          # Mask values in logs
+          echo "::add-mask::$DB_HOST"
+          echo "::add-mask::$DB_PORT"
 
-  #     - name: Upload DB outputs
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: db-env-vars
-  #         path: backend-infra/db_outputs.env  # Correct path to file
+      - name: Upload DB outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-env-vars
+          path: backend-infra/db_outputs.env  # Correct path to file
 
-  # deploy-serverless:
-  #   needs: aws-resources-deploy
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ENVIRONMENT: dev
-  #     AWS_REGION: us-east-1
-  #     API_ROOT_PATH: api/v1
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     # Configure AWS credentials
-  #     - name: Configure AWS Credentials
-  #       run: |
-  #         echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-  #         echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-  #         # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
-
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 18
-
-  #     - name: Show package.json
-  #       run: cat package.json
-
-  #     - name: Install dependencies
-  #       run: npm install
-
-
-  #     - name: Verify pg package
-  #       run: |
-  #         if [ -d "node_modules/pg" ]; then
-  #           echo "pg package found in node_modules"
-  #         else
-  #           echo "Error: pg package not found in node_modules"
-  #           exit 1
-  #         fi
-
-  #     - name: Build TypeScript
-  #       run: npm run build
-
-  #     - name: Verify deployment package
-  #       run: |
-  #         echo "Dist contents:"
-  #         ls -la dist/
-  #         echo "Node modules:"
-  #         ls -la node_modules/ | grep pg
-
-  #     - name: Install Serverless Framework
-  #       run: npm install -g serverless@4.0.0
-
-  #     - name: Download DB outputs
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: db-env-vars
-  #         path: ./
-
-  #     - name: Load DB variables
-  #       run: |
-  #         # Load variables from file
-  #         source ./db_outputs.env
-  #         echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
-  #         echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
-
-  #     - name: Use the variables
-  #       run: |
-  #         echo "Using DB host: $DB_HOST"
-  #         echo "Using DB port: $DB_PORT"
-
-  #     - name: Retrieve Secrets from AWS Secrets Manager
-  #       id: get-secrets
-  #       run: |
-  #         SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v3"
-  #         echo "Retrieving secrets from: $SECRET_NAME"
-  #         SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET_NAME --query ARN --output text)
-  #         echo "Secret ARN: $SECRET_ARN"
-          
-  #         # Retrieve secret value
-  #         SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
-  #         echo "Raw secret value retrieved"
-  #         echo "$SECRET_VALUE" > secret.json
-          
-  #         # Parse values
-  #         DB_NAME=$(jq -r '.db_name' secret.json)
-  #         DB_USER=$(jq -r '.db_user' secret.json)
-  #         DB_PASSWORD=$(jq -r '.db_password' secret.json)
-          
-  #         # Log non-sensitive values
-  #         echo "DB_NAME: $DB_NAME"
-  #         echo "DB_USER: $DB_USER"
-  #         echo "DB_PORT: $DB_PORT"
-
-  #         # Set environment variables
-  #         echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
-  #         echo "DB_USER=$DB_USER" >> $GITHUB_ENV
-  #         echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
-  #         echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
-  #         echo "JWT_SECRET=$JWT_SECRET" >> $GITHUB_ENV
-  #         echo "PG_ENCRYPT_SECRET=$PG_ENCRYPT_SECRET" >> $GITHUB_ENV
-
-  #     - name: Create env.yml
-  #       run: |
-  #         cat <<EOF > env.yml
-  #         $ENVIRONMENT:
-  #           DB_HOST: ${{ env.DB_HOST }}
-  #           DB_NAME: ${{ env.DB_NAME }}
-  #           DB_USER: ${{ env.DB_USER }}
-  #           DB_PASSWORD: ${{ env.DB_PASSWORD }}
-  #           DB_PORT: ${{ env.DB_PORT }}
-            
-  #           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  #           PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
-  #           AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
-  #           FE_APP_URL: ${{ secrets.FE_APP_URL }}
-  #           API_ROOT_PATH: ${API_ROOT_PATH}
-  #         EOF
-          
-  #         # Show non-sensitive parts of env.yml
-  #         echo "env.yml contents (redacted):"
-  #         grep -v -E 'DB_PASSWORD|JWT_SECRET|PG_ENCRYPT_SECRET' env.yml
-
-  #     - name: Deploy Serverless App & API Gateway Endpoints
-  #       run: |
-  #         export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-  #         sls deploy --stage $ENVIRONMENT
-  ####################################################################
-  # INFRASTRUCTURE DESTRUCTION (UNCOMMENT THIS SECTION WHEN DESTROYING)
-  ####################################################################
-  destroy-serverless:
+  deploy-serverless:
+    needs: aws-resources-deploy
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: dev
@@ -219,84 +92,238 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Configure AWS credentials
       - name: Configure AWS Credentials
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # Install ALL dependencies including devDependencies
+      - name: Show package.json
+        run: cat package.json
+
       - name: Install dependencies
         run: npm install
 
+
+      - name: Verify pg package
+        run: |
+          if [ -d "node_modules/pg" ]; then
+            echo "pg package found in node_modules"
+          else
+            echo "Error: pg package not found in node_modules"
+            exit 1
+          fi
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Verify deployment package
+        run: |
+          echo "Dist contents:"
+          ls -la dist/
+          echo "Node modules:"
+          ls -la node_modules/ | grep pg
+
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
+
+      - name: Download DB outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: db-env-vars
+          path: ./
+
+      - name: Load DB variables
+        run: |
+          # Load variables from file
+          source ./db_outputs.env
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+
+      - name: Use the variables
+        run: |
+          echo "Using DB host: $DB_HOST"
+          echo "Using DB port: $DB_PORT"
+
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
         run: |
           SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v3"
+          echo "Retrieving secrets from: $SECRET_NAME"
+          SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET_NAME --query ARN --output text)
+          echo "Secret ARN: $SECRET_ARN"
+          
+          # Retrieve secret value
           SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+          echo "Raw secret value retrieved"
           echo "$SECRET_VALUE" > secret.json
+          
+          # Parse values
           DB_NAME=$(jq -r '.db_name' secret.json)
           DB_USER=$(jq -r '.db_user' secret.json)
           DB_PASSWORD=$(jq -r '.db_password' secret.json)
+          
+          # Log non-sensitive values
+          echo "DB_NAME: $DB_NAME"
+          echo "DB_USER: $DB_USER"
+          echo "DB_PORT: $DB_PORT"
+
+          # Set environment variables
           echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
           echo "DB_USER=$DB_USER" >> $GITHUB_ENV
           echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+          echo "JWT_SECRET=$JWT_SECRET" >> $GITHUB_ENV
+          echo "PG_ENCRYPT_SECRET=$PG_ENCRYPT_SECRET" >> $GITHUB_ENV
 
-      # Create minimal env.yml needed for destruction
-      - name: Create destruction env.yml
+      # Add to aws-resources-deploy job
+      - name: Set VPC outputs
+        id: vpc-outputs
+        run: |
+          echo "lambda_sg_id=$(terraform output -raw lambda_sg_id)" >> $GITHUB_OUTPUT
+          echo "subnet_ids=$(terraform output -raw subnet_ids | jq -r 'join(\",\")')" >> $GITHUB_OUTPUT
+
+      - name: Create env.yml
         run: |
           cat <<EOF > env.yml
           $ENVIRONMENT:
-            DB_HOST: "dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com"  # Needed but not used in destruction
+            DB_HOST: ${{ env.DB_HOST }}
             DB_NAME: ${{ env.DB_NAME }}
             DB_USER: ${{ env.DB_USER }}
             DB_PASSWORD: ${{ env.DB_PASSWORD }}
-            DB_PORT: 5432
+            DB_PORT: ${{ env.DB_PORT }}
             
             JWT_SECRET: ${{ secrets.JWT_SECRET }}
             PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
             AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
             FE_APP_URL: ${{ secrets.FE_APP_URL }}
             API_ROOT_PATH: ${API_ROOT_PATH}
-          EOF
 
-      - name: Destroy Serverless App
+            LAMBDA_SG_ID: ${{ needs.aws-resources-deploy.outputs.lambda_sg_id }}
+            SUBNET_IDS: "${{ needs.aws-resources-deploy.outputs.subnet_ids }}"
+
+          EOF
+          
+          # Show non-sensitive parts of env.yml
+          echo "env.yml contents (redacted):"
+          grep -v -E 'DB_PASSWORD|JWT_SECRET|PG_ENCRYPT_SECRET' env.yml
+
+      - name: Deploy Serverless App & API Gateway Endpoints
         run: |
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-          sls remove --stage $ENVIRONMENT
+          sls deploy --stage $ENVIRONMENT
 
-  destroy-terraform:
-    needs: destroy-serverless
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend-infra
-    env:
-      ENVIRONMENT: dev
-      AWS_REGION: us-east-1
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+#   ####################################################################
+#   # INFRASTRUCTURE DESTRUCTION (UNCOMMENT THIS SECTION WHEN DESTROYING)
+#   ####################################################################
+# name: Deploy lumifi backend Infrastructure to development environment
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+# on:
+#   push:
+#     branches:
+#       - develop-sls-devprod
+      
+# permissions:
+#   contents: read
+#   id-token: write
 
-      - name: Terraform Init
-        run: terraform init -reconfigure
+# jobs:
 
-      - name: Select Workspace
-        run: terraform workspace select $ENVIRONMENT
+#   destroy-serverless:
+#     runs-on: ubuntu-latest
+#     env:
+#       ENVIRONMENT: dev
+#       AWS_REGION: us-east-1
+#       API_ROOT_PATH: api/v1
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+#       - name: Configure AWS Credentials
+#         run: |
+#           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+#           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 18
+
+#       # Install ALL dependencies including devDependencies
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Install Serverless Framework
+#         run: npm install -g serverless@4.0.0
+#       - name: Retrieve Secrets from AWS Secrets Manager
+#         id: get-secrets
+#         run: |
+#           SECRET_NAME="$ENVIRONMENT-lumifi-rds_credentials-backend-v3"
+#           SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text)
+#           echo "$SECRET_VALUE" > secret.json
+#           DB_NAME=$(jq -r '.db_name' secret.json)
+#           DB_USER=$(jq -r '.db_user' secret.json)
+#           DB_PASSWORD=$(jq -r '.db_password' secret.json)
+#           echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+#           echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+#           echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+
+#       # Create minimal env.yml needed for destruction
+#       - name: Create destruction env.yml
+#         run: |
+#           cat <<EOF > env.yml
+#           $ENVIRONMENT:
+#             DB_HOST: "dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com"  # Needed but not used in destruction
+#             DB_NAME: ${{ env.DB_NAME }}
+#             DB_USER: ${{ env.DB_USER }}
+#             DB_PASSWORD: ${{ env.DB_PASSWORD }}
+#             DB_PORT: 5432
+            
+#             JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#             PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
+#             AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
+#             FE_APP_URL: ${{ secrets.FE_APP_URL }}
+#             API_ROOT_PATH: ${API_ROOT_PATH}
+#           EOF
+
+#       - name: Destroy Serverless App
+#         run: |
+#           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+#           sls remove --stage $ENVIRONMENT
+
+#   destroy-terraform:
+#     needs: destroy-serverless
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: backend-infra
+#     env:
+#       ENVIRONMENT: dev
+#       AWS_REGION: us-east-1
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Configure AWS Credentials
+#         run: |
+#           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+#           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v3
+
+#       - name: Terraform Init
+#         run: terraform init -reconfigure
+
+#       - name: Select Workspace
+#         run: terraform workspace select $ENVIRONMENT
+
+#       - name: Terraform Destroy
+#         run: terraform destroy -auto-approve
