@@ -20,8 +20,21 @@ provider:
     shouldStartNameWithService: true 
     accessLogs:
       format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
-    cors: true
+    cors: 
+      allowedOrigins: '*'
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+        - X-Api-Key
+      allowedMethods: '*'
 
+  vpc:
+    securityGroupIds:
+      - ${self:custom.env.LAMBDA_SG_ID}
+    subnetIds: 
+      - ${self:custom.env.SUBNET_IDS.split(',')[0]}
+      - ${self:custom.env.SUBNET_IDS.split(',')[1]}
+      
   # To disable API Gateway creation
   apiGateway:
     disableDefaultEndpoint: false
