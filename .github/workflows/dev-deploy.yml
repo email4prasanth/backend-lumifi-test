@@ -13,7 +13,6 @@ permissions:
   id-token: write
 
 jobs:
-
   aws-resources-deploy:
     runs-on: ubuntu-latest
     defaults:
