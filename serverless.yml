@@ -72,6 +72,9 @@ provider:
     # AWS_REGION: ${self:custom.env.AWS_REGION}
     AWS_SES_SENDER_EMAIL: ${self:custom.env.AWS_SES_SENDER_EMAIL}
     FE_APP_URL: ${self:custom.env.FE_APP_URL}
+    LAMBDA_SG_ID: ${self:custom.env.LAMBDA_SG_ID}
+    SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
+    
 
 package:
   patterns:
