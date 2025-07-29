@@ -1,6 +1,6 @@
 # Secrets Manager - RDS Credentials
 resource "aws_secretsmanager_secret" "rds_credentials" {
-  name        = "${terraform.workspace}-${local.project_name.name}-rds_credentials-backend-v4"
+  name        = "${terraform.workspace}-${local.project_name.name}-rds_credentials-backend-v5"
   description = "PostgreSQL credentials for ${terraform.workspace}"
   tags        = local.tags
 }
