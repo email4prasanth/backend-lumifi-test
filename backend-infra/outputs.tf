@@ -4,7 +4,7 @@ output "lambda_sg_id" {
 }
 
 output "subnet_ids" {
-  value = aws_subnet.lumifi_subnets[*].id
+  value = join(",", aws_subnet.lumifi_subnets[*].id)
 }
 
 # Example Terraform outputs

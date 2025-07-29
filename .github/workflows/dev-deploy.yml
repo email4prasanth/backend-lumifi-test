@@ -26,8 +26,8 @@ jobs:
       db_host: ${{ steps.set-db-outputs.outputs.db_host }}
       db_port: ${{ steps.set-db-outputs.outputs.db_port }}
 
-      # lambda_sg_id: ${{ steps.set-vpc-outputs.outputs.lambda_sg_id }}
-      # subnet_ids: ${{ steps.set-vpc-outputs.outputs.subnet_ids }}
+      lambda_sg_id: ${{ steps.set-vpc-outputs.outputs.lambda_sg_id }}
+      subnet_ids: ${{ steps.set-vpc-outputs.outputs.subnet_ids }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,6 +58,16 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+      - name: Terraform output
+        run: |
+          LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id)
+          echo "Lambda sg: $LAMBDA_SG_ID"
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> db_outputs.env
+
+          SUBNET_IDS=$(terraform output -raw subnet_ids)
+          echo "Subnet id: $SUBNET_IDS"
+          echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
 
       # Get and parse RDS endpoint seperate endpoint and port
       - name: Get and Parse RDS Endpoint
@@ -148,11 +158,15 @@ jobs:
           source ./db_outputs.env
           echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
           echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
+          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
 
       - name: Use the variables
         run: |
           echo "Using DB host: $DB_HOST"
           echo "Using DB port: $DB_PORT"
+          echo "Using Lambda SG: $LAMBDA_SG_ID"
+          echo "Using Subnet ID: $SUBNET_IDS"
 
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
@@ -185,6 +199,9 @@ jobs:
           echo "JWT_SECRET=$JWT_SECRET" >> $GITHUB_ENV
           echo "PG_ENCRYPT_SECRET=$PG_ENCRYPT_SECRET" >> $GITHUB_ENV
 
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
+          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
+
       # # Add to aws-resources-deploy job
       # - name: Set VPC outputs
       #   id: set-vpc-outputs
@@ -212,8 +229,8 @@ jobs:
             FE_APP_URL: ${{ secrets.FE_APP_URL }}
             API_ROOT_PATH: ${API_ROOT_PATH}
 
-            # LAMBDA_SG_ID: ${{ needs.aws-resources-deploy.outputs.lambda_sg_id }}
-            # SUBNET_IDS: "${{ needs.aws-resources-deploy.outputs.subnet_ids }}"
+            LAMBDA_SG_ID: ${{ needs.aws-resources-deploy.outputs.lambda_sg_id }}
+            SUBNET_IDS: "${{ needs.aws-resources-deploy.outputs.subnet_ids }}"
 
           EOF
           
