@@ -28,12 +28,12 @@ provider:
         - X-Api-Key
       allowedMethods: '*'
 
-  vpc:
-    securityGroupIds:
-      - ${self:custom.env.LAMBDA_SG_ID}
-    subnetIds: 
-      - ${self:custom.env.SUBNET_IDS.split(',')[0]}
-      - ${self:custom.env.SUBNET_IDS.split(',')[1]}
+  # vpc:
+  #   securityGroupIds:
+  #     - ${self:custom.env.LAMBDA_SG_ID}
+  #   subnetIds: 
+  #     - ${self:custom.env.SUBNET_IDS.split(',')[0]}
+  #     - ${self:custom.env.SUBNET_IDS.split(',')[1]}
       
   # To disable API Gateway creation
   apiGateway:
