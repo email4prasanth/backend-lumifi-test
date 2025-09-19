@@ -315,7 +315,7 @@ jobs:
   #         sls remove --stage $ENVIRONMENT
 
   destroy-terraform:
-    needs: destroy-serverless
+    # needs: destroy-serverless
     runs-on: ubuntu-latest
     defaults:
       run:
