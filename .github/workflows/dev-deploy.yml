@@ -358,7 +358,9 @@
 name: Destroy lumifi backend Infrastructure
 
 on:
-  workflow_dispatch:   # Manually trigger this job from the GitHub Actions UI
+  push:
+    branches:
+      - develop-test
 
 permissions:
   contents: read
