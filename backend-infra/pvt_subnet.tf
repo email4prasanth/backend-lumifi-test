@@ -48,10 +48,12 @@ resource "aws_route_table" "private_rt" {
 # Associate private subnets
 resource "aws_route_table_association" "private_assoc" {
   # count          = length(aws_subnet.lumifi_private_subnets)
-  count          = length(local.avail_zones)
-  subnet_id      = aws_subnet.lumifi_private_subnets[count.index].id
+  # count          = length(local.avail_zones)
+  count     = terraform.workspace == "dev" ? length(local.avail_zones) : 0 # Only create in dev
+  subnet_id = aws_subnet.lumifi_private_subnets[count.index].id
   # route_table_id = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : try(data.aws_route_tables.private[0].ids[0], null)
-  route_table_id = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : data.aws_route_tables.private[0].ids[0]
+  # route_table_id = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : data.aws_route_tables.private[0].ids[0]
+  route_table_id = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : try(data.aws_route_tables.private[0].ids[0], null)
 }
 output "lumifi_private_subnets" {
   value = aws_subnet.lumifi_private_subnets[*].id
@@ -66,8 +68,8 @@ data "aws_route_tables" "private" {
     values = [data.aws_vpc.existing[0].id]
   }
   filter {
-    name   = "tag:Name"  # Changed from "tag:Tier"
-    values = ["*private*"]  # Looks for Name tags containing "private"
+    name   = "tag:Name"    # Changed from "tag:Tier"
+    values = ["*private*"] # Looks for Name tags containing "private"
   }
 }
 
