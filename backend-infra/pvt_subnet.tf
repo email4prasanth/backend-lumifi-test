@@ -1,6 +1,6 @@
 # Private Subnets
 resource "aws_subnet" "lumifi_private_subnets" {
-  count = length(local.avail_zones)
+  count = terraform.workspace == "dev" ? length(local.avail_zones) : 0
 
   vpc_id = terraform.workspace == "dev" ? aws_vpc.lumifi-vpc[0].id : data.aws_vpc.existing[0].id
 
