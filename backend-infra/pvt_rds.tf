@@ -2,8 +2,8 @@
 resource "aws_db_subnet_group" "private_db" {
   count = var.deploy_private_rds ? 1 : 0
 
-  name       = "${terraform.workspace}-${local.project_name.name}-lumifi-private-db-subnet-group"
-  subnet_ids = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.public[0].ids
+  name       = "${terraform.workspace}-${local.project_name.name}-private-db-subnet-group"
+  subnet_ids = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.private[0].ids
 
   tags = merge(local.tags, {
     Name = "${terraform.workspace}-${local.project_name.name}-pvt-db-subnet-group"
@@ -14,7 +14,7 @@ resource "aws_db_subnet_group" "private_db" {
 resource "aws_db_instance" "postgres_private" {
   count = var.deploy_private_rds ? 1 : 0
 
-  identifier        = "${terraform.workspace}-lumifi-db-private"
+  identifier        = "${terraform.workspace}-db-private"
   allocated_storage = local.rds.allocated_storage
   storage_type      = "gp3"
   engine            = "postgres"
@@ -28,7 +28,7 @@ resource "aws_db_instance" "postgres_private" {
   password                  = random_password.db_admin_password.result
   parameter_group_name      = "default.postgres15"
   skip_final_snapshot       = terraform.workspace == "dev" ? true : false
-  final_snapshot_identifier = terraform.workspace == "prod" ? "${terraform.workspace}-lumifi-db-final-snapshot" : null
+  final_snapshot_identifier = terraform.workspace == "prod" ? "${terraform.workspace}-db-final-snapshot" : null
   # vpc_security_group_ids    = [aws_security_group.rds_private.id]
   # db_subnet_group_name      = aws_db_subnet_group.private_db.name
   vpc_security_group_ids = [aws_security_group.rds_private[0].id]
