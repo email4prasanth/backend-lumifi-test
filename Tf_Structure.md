@@ -41,6 +41,6 @@ test-backend-lumifi/
 ```
 
 aws secretsmanager delete-secret `
-    --secret-id dev-lumifitest-rds-credentials-be `
+    --secret-id prod-lumifitest-rds-credentials-be-pvt `
     --force-delete-without-recovery `
     --region us-east-1
