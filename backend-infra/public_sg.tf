@@ -4,7 +4,8 @@ resource "aws_security_group" "rds" {
 
   name        = "${terraform.workspace}-rds-sg"
   description = "Restricted access to PostgreSQL"
-  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
   ingress {
     from_port   = 5432

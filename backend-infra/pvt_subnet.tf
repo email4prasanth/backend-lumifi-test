@@ -2,7 +2,8 @@
 resource "aws_subnet" "lumifi_private_subnets" {
   count = length(local.avail_zones)
 
-  vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+  vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 100)
   availability_zone       = local.avail_zones[count.index]
   map_public_ip_on_launch = false
@@ -29,7 +30,8 @@ resource "aws_nat_gateway" "nat" {
 }
 # Private Route Table
 resource "aws_route_table" "private_rt" {
-  vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+  vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
   route {
     cidr_block     = "0.0.0.0/0"

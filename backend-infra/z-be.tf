@@ -5,7 +5,7 @@
 #     bucket  = "lumifitfstore"
 #     key     = "backend/terraform.tfstate"
 #     region  = "us-east-1"
-#     # profile = "lumifitest"
+#     profile = "lumifitest"
 #   }
 # }
 
@@ -13,6 +13,7 @@
 # ### File: data_sources.tf ###
 # # Reuse existing VPC instead of creating a new one
 # data "aws_vpc" "existing" {
+#   count = terraform.workspace == "prod" ? 1 : 0
 #   filter {
 #     name   = "tag:Name"
 #     values = ["lumifitest-vpc"]
@@ -20,6 +21,7 @@
 # }
 # # reuse existing subnets
 # data "aws_subnets" "existing" {
+#   count = terraform.workspace == "prod" ? 1 : 0
 #   filter {
 #     name   = "vpc-id"
 #     values = [data.aws_vpc.existing.id]
@@ -233,7 +235,7 @@
 # }
 
 # output "subnet_ids" {
-#   value = join(",", terraform.workspace == "prod" ? data.aws_subnets.existing.ids : aws_subnet.lumifi_subnets[*].id)
+#   value = join(",", terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id)
 # }
 
 # # # Example Terraform outputs
@@ -267,7 +269,8 @@
 
 # output "vpc_id" {
 #   description = "ID of the Lumifi VPC"
-#   value       = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   value       = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 # }
 
 # output "public_subnet_names" {
@@ -277,7 +280,7 @@
 
 # output "public_subnet_ids" {
 #   description = "IDs of the public subnets"
-#   value       = terraform.workspace == "prod" ? data.aws_subnets.existing.ids : aws_subnet.lumifi_subnets[*].id
+#   value       = terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id
 # }
 
 # output "private_subnet_names" {
@@ -414,7 +417,7 @@
 # # AWS Provider Configuration
 # provider "aws" {
 #   region  = local.aws_region
-#   # profile = "lumifitest"
+#   profile = "lumifitest"
 # }
 
 
@@ -425,7 +428,7 @@
 #   count = var.deploy_public_rds ? 1 : 0
 
 #   name       = "${terraform.workspace}-lumifi-public-db-subnet-group"
-#   subnet_ids = terraform.workspace == "prod" ? data.aws_subnets.existing.ids : aws_subnet.lumifi_subnets[*].id
+#   subnet_ids = terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id
 
 #   tags = merge(local.tags, {
 #     Name = "${terraform.workspace}-db-subnet-group"
@@ -535,7 +538,8 @@
 
 #   name        = "${terraform.workspace}-rds-sg"
 #   description = "Restricted access to PostgreSQL"
-#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
 #   ingress {
 #     from_port   = 5432
@@ -644,7 +648,8 @@
 
 #   name        = "${terraform.workspace}-lambda-pvt-sg"
 #   description = "Private Lambda access to private RDS"
-#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
 #   egress {
 #     from_port   = 0
@@ -663,7 +668,8 @@
 #   count = var.deploy_private_rds ? 1 : 0
 
 #   name   = "${terraform.workspace}-${local.project_name.name}-rds-pvt-sg"
-#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
 #   ingress {
 #     from_port       = 5432
@@ -690,7 +696,8 @@
 # resource "aws_subnet" "lumifi_private_subnets" {
 #   count = length(local.avail_zones)
 
-#   vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 #   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 100)
 #   availability_zone       = local.avail_zones[count.index]
 #   map_public_ip_on_launch = false
@@ -717,7 +724,8 @@
 # }
 # # Private Route Table
 # resource "aws_route_table" "private_rt" {
-#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
 #   route {
 #     cidr_block     = "0.0.0.0/0"
@@ -818,7 +826,8 @@
 # resource "aws_security_group" "lumifi_sg" {
 #   name        = "${terraform.workspace}-${local.project_name.name}-sg"
 #   description = "Security group for lumifi instances"
-#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
 #   dynamic "ingress" {
 #     for_each = [for rule in local.sg : rule if rule.type == "ingress"]
@@ -850,7 +859,8 @@
 # resource "aws_security_group" "lambda_sg" {
 #   name        = "${terraform.workspace}-lambda-sg"
 #   description = "Lambda access to RDS and internet"
-#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 
 #   egress {
 #     from_port   = 0
@@ -891,17 +901,19 @@
 # ### File: vpc_endpoints.tf ###
 # # # VPC Endpoint for Amazon S3 (Gateway Type)
 # # resource "aws_vpc_endpoint" "s3" {
-# #   vpc_id            = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+# #   vpc_id            = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 # #   service_name      = "com.amazonaws.${local.aws_region}.s3"
 # #   vpc_endpoint_type = "Gateway"
 # #   route_table_ids   = [aws_route_table.lumifi-pub-rt.id]
 # # }
 # # # VPC Endpoint for AWS Secrets Manager (Interface Type)
 # # resource "aws_vpc_endpoint" "secretsmanager" {
-# #   vpc_id              = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+# #   vpc_id              = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 # #   service_name        = "com.amazonaws.${local.aws_region}.secretsmanager"
 # #   vpc_endpoint_type   = "Interface"
-# #   subnet_ids          = terraform.workspace == "prod" ? data.aws_subnets.existing.ids : aws_subnet.lumifi_subnets[*].id   # Attach endpoint to subnets
+# #   subnet_ids          = terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id   # Attach endpoint to subnets
 # #   security_group_ids  = [aws_security_group.lambda_sg.id] # Use Lambda SG to allow Secrets Manager traffic
 # #   private_dns_enabled = true                              # Enable private DNS for internal resolution
 # # }
@@ -910,6 +922,7 @@
 # ### File: vpc_subnet.tf ###
 # # VPC Configuration
 # resource "aws_vpc" "lumifi-vpc" {
+#   count = terraform.workspace == "dev" ? 1 : 0
 #   # Only create the VPC if it doesn't exist. You can import the existing VPC for dev.
 #   cidr_block           = local.vpc_cidr
 #   enable_dns_hostnames = true
@@ -923,7 +936,8 @@
 # resource "aws_subnet" "lumifi_subnets" {
 #   count = length(local.avail_zones)
 
-#   vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 #   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 1)
 #   availability_zone       = local.avail_zones[count.index]
 #   map_public_ip_on_launch = true
@@ -936,7 +950,8 @@
 
 # # Internet Gateway for Public Access
 # resource "aws_internet_gateway" "lumifi-igw" {
-#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 #   tags = {
 #     Name = "${terraform.workspace}-${local.project_name.name}-IGW"
 #   }
@@ -944,7 +959,8 @@
 
 # # Public Route Table Configuration
 # resource "aws_route_table" "lumifi-pub-rt" {
-#   vpc_id     = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
+#   vpc_id     = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+
 #   depends_on = [aws_internet_gateway.lumifi-igw]
 
 #   route {
