@@ -8,8 +8,9 @@ data "aws_vpc" "existing" {
 }
 # reuse existing subnets
 data "aws_subnets" "existing" {
+  count = terraform.workspace == "prod" ? 1 : 0
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.existing.id]
+    values = [data.aws_vpc.existing[0].id]
   }
 }
