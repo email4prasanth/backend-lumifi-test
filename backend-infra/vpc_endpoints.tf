@@ -4,7 +4,7 @@
 
 #   service_name      = "com.amazonaws.${local.aws_region}.s3"
 #   vpc_endpoint_type = "Gateway"
-#   route_table_ids   = [aws_route_table.lumifi-pub-rt.id]
+#   route_table_ids   = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : try(data.aws_route_tables.public.ids[0], null)
 # }
 # # VPC Endpoint for AWS Secrets Manager (Interface Type)
 # resource "aws_vpc_endpoint" "secretsmanager" {
@@ -12,7 +12,7 @@
 
 #   service_name        = "com.amazonaws.${local.aws_region}.secretsmanager"
 #   vpc_endpoint_type   = "Interface"
-#   subnet_ids          = terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id   # Attach endpoint to subnets
+#   subnet_ids          = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.public.ids
 #   security_group_ids  = [aws_security_group.lambda_sg.id] # Use Lambda SG to allow Secrets Manager traffic
 #   private_dns_enabled = true                              # Enable private DNS for internal resolution
 # }
