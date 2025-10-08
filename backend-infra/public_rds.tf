@@ -4,7 +4,7 @@ resource "aws_db_subnet_group" "public_db" {
   count = var.deploy_public_rds ? 1 : 0
 
   name       = "${terraform.workspace}-lumifi-public-db-subnet-group"
-  subnet_ids = terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id
+  subnet_ids = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.public[0].ids
 
   tags = merge(local.tags, {
     Name = "${terraform.workspace}-db-subnet-group"

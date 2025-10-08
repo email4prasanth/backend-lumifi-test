@@ -29,57 +29,62 @@ output "subnet_ids" {
 #   )
 # }
 # ------------------------------
-# 🌐 VPC & Subnets
+# 🌐 VPC Outputs
 # ------------------------------
-output "vpc_name" {
-  description = "Name of the Lumifi VPC"
-  value       = terraform.workspace == "prod" ? data.aws_vpc.existing[0].tags["Name"] : aws_vpc.lumifi-vpc[0].tags["Name"]
+output "vpc_id" {
+  value = terraform.workspace == "dev" ? aws_vpc.lumifi-vpc[0].id : data.aws_vpc.existing[0].id
 }
 
-output "vpc_id" {
-  description = "ID of the Lumifi VPC"
-  value       = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+output "vpc_name" {
+  value = terraform.workspace == "dev" ? aws_vpc.lumifi-vpc[0].tags["Name"] : data.aws_vpc.existing[0].tags["Name"]
+}
 
+# ------------------------------
+# Public Subnets Outputs
+# ------------------------------
+output "public_subnet_ids" {
+  value = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.public[0].ids
 }
 
 output "public_subnet_names" {
-  description = "Names of the public subnets"
-  value       = [for s in aws_subnet.lumifi_subnets : s.tags["Name"]]
+  value = terraform.workspace == "dev" ? [for s in aws_subnet.lumifi_subnets : s.tags["Name"]] : [for s in data.aws_subnets.public[0].ids : s]
 }
 
-output "public_subnet_ids" {
-  description = "IDs of the public subnets"
-  value       = terraform.workspace == "prod" ? data.aws_subnets.existing[0].ids : aws_subnet.lumifi_subnets[*].id
+output "internet_gateway_id" {
+  value = terraform.workspace == "dev" ? aws_internet_gateway.lumifi-igw[0].id : data.aws_internet_gateway.existing[0].id
 }
 
-output "private_subnet_names" {
-  description = "Names of the private subnets"
-  value       = [for s in aws_subnet.lumifi_private_subnets : s.tags["Name"]]
-}
-
-output "private_subnet_ids" {
-  description = "IDs of the private subnets"
-  value       = aws_subnet.lumifi_private_subnets[*].id
-}
-
-# ------------------------------
-# 🧱 Route Tables, Gateways
-# ------------------------------
 output "internet_gateway_name" {
-  description = "Name of the Internet Gateway"
-  value       = aws_internet_gateway.lumifi-igw[0].tags["Name"]
+  value = terraform.workspace == "dev" ? aws_internet_gateway.lumifi-igw[0].tags["Name"] : data.aws_internet_gateway.existing[0].tags["Name"]
+}
+
+output "public_route_table_id" {
+  value = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : data.aws_route_tables.public[0].ids[0]
 }
 
 output "public_route_table_name" {
-  description = "Name of the Public Route Table"
-  value       = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].tags["Name"] : data.aws_route_tables.existing[0].tags["Name"]
+  value = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].tags["Name"] : data.aws_route_tables.public[0].tags["Name"]
 }
 
+# ------------------------------
+# Private Subnets Outputs
+# ------------------------------
+output "private_subnet_ids" {
+  value = terraform.workspace == "dev" ? aws_subnet.lumifi_private_subnets[*].id : data.aws_subnets.private[0].ids
+}
+
+output "private_subnet_names" {
+  value = terraform.workspace == "dev" ? [for s in aws_subnet.lumifi_private_subnets : s.tags["Name"]] : [for s in data.aws_subnets.private[0].ids : s]
+}
+
+output "private_route_table_id" {
+  value = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : data.aws_route_tables.private[0].ids[0]
+}
 
 output "private_route_table_name" {
-  description = "Name of the Private Route Table"
-  value       = terraform.workspace == "dev" ? aws_route_table.private_rt[0].tags["Name"] : data.aws_route_tables.existing_private[0].tags["Name"]
+  value = terraform.workspace == "dev" ? aws_route_table.private_rt[0].tags["Name"] : data.aws_route_tables.private[0].tags["Name"]
 }
+
 
 # ------------------------------
 # 🔒 Security Groups
