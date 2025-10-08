@@ -3,7 +3,7 @@
 resource "aws_security_group" "lumifi_sg" {
   name        = "${terraform.workspace}-${local.project_name.name}-sg"
   description = "Security group for lumifi instances"
-  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
+  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
 
   dynamic "ingress" {
     for_each = [for rule in local.sg : rule if rule.type == "ingress"]
@@ -35,7 +35,7 @@ resource "aws_security_group" "lumifi_sg" {
 resource "aws_security_group" "lambda_sg" {
   name        = "${terraform.workspace}-lambda-sg"
   description = "Lambda access to RDS and internet"
-  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
+  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
 
   egress {
     from_port   = 0
