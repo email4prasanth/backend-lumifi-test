@@ -59,10 +59,12 @@ output "internet_gateway_name" {
 }
 
 output "public_route_table_id" {
+    # value = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : try(data.aws_route_tables.public[0].ids[0], null)
   value = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : data.aws_route_tables.public[0].ids[0]
 }
 
 output "public_route_table_name" {
+  # value = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].tags["Name"] : try(data.aws_route_tables.public[0].tags[0]["Name"], null)
   value = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].tags["Name"] : data.aws_route_tables.public[0].tags["Name"]
 }
 
@@ -78,10 +80,12 @@ output "private_subnet_names" {
 }
 
 output "private_route_table_id" {
+  # value = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : try(data.aws_route_tables.private[0].ids[0], null)
   value = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : data.aws_route_tables.private[0].ids[0]
 }
 
 output "private_route_table_name" {
+  # value = terraform.workspace == "dev" ? aws_route_table.private_rt[0].tags["Name"] : try(data.aws_route_tables.private[0].tags[0]["Name"], null)
   value = terraform.workspace == "dev" ? aws_route_table.private_rt[0].tags["Name"] : data.aws_route_tables.private[0].tags["Name"]
 }
 
