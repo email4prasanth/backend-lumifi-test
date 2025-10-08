@@ -39,6 +39,10 @@ test-backend-lumifi/
 ├── README.md               # Project documentation
 └── other config files...   # Other configuration files
 ```
+aws secretsmanager delete-secret `
+    --secret-id dev-lumifitest-rds-credentials-be `
+    --force-delete-without-recovery `
+    --region us-east-1
 
 aws secretsmanager delete-secret `
     --secret-id prod-lumifitest-rds-credentials-be-pvt `
