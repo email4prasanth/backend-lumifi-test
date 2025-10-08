@@ -4,7 +4,7 @@ resource "aws_subnet" "lumifi_private_subnets" {
 
   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
-  cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 100)
+  cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index)
   availability_zone       = local.avail_zones[count.index]
   map_public_ip_on_launch = false
 

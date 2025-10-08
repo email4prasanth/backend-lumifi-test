@@ -28,6 +28,7 @@ resource "aws_subnet" "lumifi_subnets" {
 
 # Internet Gateway for Public Access
 resource "aws_internet_gateway" "lumifi-igw" {
+  count  = terraform.workspace == "dev" ? 1 : 0
   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
   tags = {
