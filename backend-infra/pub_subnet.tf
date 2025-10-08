@@ -106,8 +106,8 @@ data "aws_route_tables" "public" {
     values = [data.aws_vpc.existing[0].id]
   }
   filter {
-    name   = "tag:Tier"
-    values = ["public"]
+    name   = "tag:Name"  # Changed from "tag:Tier"
+    values = ["*MainRT*"]  # Looks for Name tags containing "MainRT"
   }
 }
 # ------------------------------
