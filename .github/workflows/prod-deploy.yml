@@ -109,7 +109,9 @@
 name: Destroy lumifi backend Infrastructure in production environment
 
 on:
-  workflow_dispatch:   # Manual trigger from GitHub Actions UI
+  push:
+    branches:
+      - production-test
 
 permissions:
   contents: read
