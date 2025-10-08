@@ -1,14 +1,23 @@
 
 ```sh
-lumifi-backend/
+```sh
+test-backend-lumifi/
 └── backend-infra/
     ├── backend.tf
     ├── iam.tf
+    ├── kms.tf
     ├── locals.tf
+    ├── outputs.tf
     ├── providers.tf
-    ├── rds.tf
+    ├── public_rds.tf
+    ├── public_secrets.tf
+    ├── public_sg.tf
+    ├── pvt_rds.tf
+    ├── pvt_secrets.tf
+    ├── pvt_sg.tf
+    ├── pvt_subnet.tf
+    ├── rds_password.tf
     ├── s3.tf
-    ├── secrets.tf
     ├── security_groups.tf
     ├── ses.tf
     ├── vpc_endpoints.tf

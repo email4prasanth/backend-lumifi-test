@@ -1,0 +1,52 @@
+# Private Subnets
+resource "aws_subnet" "lumifi_private_subnets" {
+  count = length(local.avail_zones)
+
+  vpc_id                  = aws_vpc.lumifi-vpc.id
+  cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 100)
+  availability_zone       = local.avail_zones[count.index]
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "${terraform.workspace}-${local.project_name.name}-private-subnet-${count.index + 1}"
+    Tier = "private"
+  }
+}
+# Elastic IP for NAT Gateway
+resource "aws_eip" "nat" {
+  tags = {
+    Name = "${terraform.workspace}-${local.project_name.name}-nat-eip"
+  }
+}
+
+# NAT Gateway in public subnet
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id = aws_subnet.lumifi_subnets[0].id  # ✅ Should point to a public subnet
+  tags = {
+    Name = "${terraform.workspace}-${local.project_name.name}-nat-gateway"
+  }
+}
+# Private Route Table
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.lumifi-vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = "${terraform.workspace}-${local.project_name.name}-private-rt"
+  }
+}
+# Associate private subnets
+resource "aws_route_table_association" "private_assoc" {
+  count          = length(aws_subnet.lumifi_private_subnets)
+  subnet_id      = aws_subnet.lumifi_private_subnets[count.index].id
+  route_table_id = aws_route_table.private_rt.id
+}
+output "lumifi_private_subnets" {
+  value = aws_subnet.lumifi_private_subnets[*].id
+}
+

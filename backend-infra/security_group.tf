@@ -1,3 +1,4 @@
+
 # Security Group for Lumifi Resources Access
 resource "aws_security_group" "lumifi_sg" {
   name        = "${terraform.workspace}-${local.project_name.name}-sg"
@@ -30,31 +31,6 @@ resource "aws_security_group" "lumifi_sg" {
     Name = "${local.project_name.name}-sg-${terraform.workspace}"
   }
 }
-
-# Security Group for RDS PostgreSQL Access
-resource "aws_security_group" "rds" {
-  name        = "${terraform.workspace}-rds-sg"
-  description = "Restricted access to PostgreSQL"
-  vpc_id      = aws_vpc.lumifi-vpc.id
-
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    cidr_blocks     = ["0.0.0.0/0"]
-    security_groups = [aws_security_group.lambda_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = local.tags
-}
-
 # Security Group for Lambda Function
 resource "aws_security_group" "lambda_sg" {
   name        = "${terraform.workspace}-lambda-sg"
