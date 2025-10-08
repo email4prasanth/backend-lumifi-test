@@ -1,5 +1,6 @@
 locals {
   aws_region = "us-east-1"
+  vpc_name   = "lumifitest-vpc"
   # Tags, VPC CIDR, Availability Zones Configuration for Dev and Prod Environment
   tags = {
     owner       = "lumifitest"
