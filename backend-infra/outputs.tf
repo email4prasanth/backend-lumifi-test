@@ -67,17 +67,18 @@ output "private_subnet_ids" {
 # ------------------------------
 output "internet_gateway_name" {
   description = "Name of the Internet Gateway"
-  value       = aws_internet_gateway.lumifi-igw.tags["Name"]
+  value       = aws_internet_gateway.lumifi-igw[0].tags["Name"]
 }
 
 output "public_route_table_name" {
   description = "Name of the Public Route Table"
-  value       = aws_route_table.lumifi-pub-rt.tags["Name"]
+  value       = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].tags["Name"] : data.aws_route_tables.existing[0].tags["Name"]
 }
+
 
 output "private_route_table_name" {
   description = "Name of the Private Route Table"
-  value       = aws_route_table.private_rt.tags["Name"]
+  value       = terraform.workspace == "dev" ? aws_route_table.private_rt[0].tags["Name"] : data.aws_route_tables.existing_private[0].tags["Name"]
 }
 
 # ------------------------------
