@@ -38,7 +38,7 @@ output "vpc_name" {
 
 output "vpc_id" {
   description = "ID of the Lumifi VPC"
-  value       = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
+  value       = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc.id
 }
 
 output "public_subnet_names" {
