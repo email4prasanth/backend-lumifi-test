@@ -38,13 +38,14 @@ resource "aws_internet_gateway" "lumifi-igw" {
 
 # Public Route Table Configuration
 resource "aws_route_table" "lumifi-pub-rt" {
+  count  = terraform.workspace == "dev" ? 1 : 0
   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
-  depends_on = [aws_internet_gateway.lumifi-igw]
+  depends_on = [aws_internet_gateway.lumifi-igw[0]]
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.lumifi-igw.id
+    gateway_id = terraform.workspace == "dev" ? aws_internet_gateway.lumifi-igw[0].id : null
   }
 
   tags = {
@@ -57,5 +58,5 @@ resource "aws_route_table_association" "subnet_associations" {
   count = length(aws_subnet.lumifi_subnets)
 
   subnet_id      = aws_subnet.lumifi_subnets[count.index].id
-  route_table_id = aws_route_table.lumifi-pub-rt.id
+  route_table_id = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : data.aws_route_tables.existing[0].ids[0]
 }
