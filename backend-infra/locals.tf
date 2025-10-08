@@ -2,11 +2,11 @@ locals {
   aws_region = "us-east-1"
   # Tags, VPC CIDR, Availability Zones Configuration for Dev and Prod Environment
   tags = {
-    owner       = "lumifi"
+    owner       = "lumifitest"
     environment = terraform.workspace
   }
   project_name = {
-    name = "lumifi"
+    name = "lumifitest"
   }
   cidr_ranges = {
     "dev"  = "10.60.0.0/16"

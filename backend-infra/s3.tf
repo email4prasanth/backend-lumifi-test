@@ -1,6 +1,6 @@
 # S3 Bucket - Backend Data
 resource "aws_s3_bucket" "backend" {
-  bucket = "${local.project_name.name}-${terraform.workspace}-backend"
+  bucket = "${local.project_name.name}-${terraform.workspace}-be-exports"
   tags   = local.tags
 }
 resource "aws_s3_bucket_versioning" "backend" {
@@ -12,7 +12,7 @@ resource "aws_s3_bucket_versioning" "backend" {
 
 # S3 Bucket - Logs Storage
 resource "aws_s3_bucket" "logs" {
-  bucket = "${local.project_name.name}-${terraform.workspace}-logs"
+  bucket = "${local.project_name.name}-${terraform.workspace}-audit-log-backup"
   tags   = local.tags
 }
 resource "aws_s3_bucket_ownership_controls" "logs" {

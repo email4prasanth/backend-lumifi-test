@@ -22,7 +22,7 @@ resource "aws_eip" "nat" {
 # NAT Gateway in public subnet
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id = aws_subnet.lumifi_subnets[0].id  # ✅ Should point to a public subnet
+  subnet_id     = aws_subnet.lumifi_subnets[0].id # ✅ Should point to a public subnet
   tags = {
     Name = "${terraform.workspace}-${local.project_name.name}-nat-gateway"
   }
