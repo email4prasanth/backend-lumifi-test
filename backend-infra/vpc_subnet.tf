@@ -1,10 +1,11 @@
 # VPC Configuration
 resource "aws_vpc" "lumifi-vpc" {
+  # Only create the VPC if it doesn't exist. You can import the existing VPC for dev.
   cidr_block           = local.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags = {
-    Name = "${terraform.workspace}-${local.project_name.name}-vpc"
+    Name = "${local.project_name.name}-vpc"
   }
 }
 
@@ -12,7 +13,7 @@ resource "aws_vpc" "lumifi-vpc" {
 resource "aws_subnet" "lumifi_subnets" {
   count = length(local.avail_zones)
 
-  vpc_id                  = aws_vpc.lumifi-vpc.id
+  vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 1)
   availability_zone       = local.avail_zones[count.index]
   map_public_ip_on_launch = true
@@ -25,7 +26,7 @@ resource "aws_subnet" "lumifi_subnets" {
 
 # Internet Gateway for Public Access
 resource "aws_internet_gateway" "lumifi-igw" {
-  vpc_id = aws_vpc.lumifi-vpc.id
+  vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
   tags = {
     Name = "${terraform.workspace}-${local.project_name.name}-IGW"
   }
@@ -33,7 +34,7 @@ resource "aws_internet_gateway" "lumifi-igw" {
 
 # Public Route Table Configuration
 resource "aws_route_table" "lumifi-pub-rt" {
-  vpc_id     = aws_vpc.lumifi-vpc.id
+  vpc_id     = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
   depends_on = [aws_internet_gateway.lumifi-igw]
 
   route {

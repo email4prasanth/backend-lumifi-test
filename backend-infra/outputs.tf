@@ -4,7 +4,7 @@ output "lambda_sg_id" {
 }
 
 output "subnet_ids" {
-  value = join(",", aws_subnet.lumifi_subnets[*].id)
+  value = join(",", terraform.workspace == "prod" ? data.aws_subnets.existing.ids : aws_subnet.lumifi_subnets[*].id)
 }
 
 # # Example Terraform outputs
@@ -38,7 +38,7 @@ output "vpc_name" {
 
 output "vpc_id" {
   description = "ID of the Lumifi VPC"
-  value       = aws_vpc.lumifi-vpc.id
+  value       = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
 }
 
 output "public_subnet_names" {
@@ -48,7 +48,7 @@ output "public_subnet_names" {
 
 output "public_subnet_ids" {
   description = "IDs of the public subnets"
-  value       = aws_subnet.lumifi_subnets[*].id
+  value       = terraform.workspace == "prod" ? data.aws_subnets.existing.ids : aws_subnet.lumifi_subnets[*].id
 }
 
 output "private_subnet_names" {

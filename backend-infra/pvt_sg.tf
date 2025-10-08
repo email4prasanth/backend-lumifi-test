@@ -5,7 +5,7 @@ resource "aws_security_group" "lambda_sg_pvt" {
 
   name        = "${terraform.workspace}-lambda-pvt-sg"
   description = "Private Lambda access to private RDS"
-  vpc_id      = aws_vpc.lumifi-vpc.id
+  vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
 
   egress {
     from_port   = 0
@@ -24,7 +24,7 @@ resource "aws_security_group" "rds_private" {
   count = var.deploy_private_rds ? 1 : 0
 
   name   = "${terraform.workspace}-${local.project_name.name}-rds-pvt-sg"
-  vpc_id = aws_vpc.lumifi-vpc.id
+  vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing.id : aws_vpc.lumifi-vpc.id
 
   ingress {
     from_port       = 5432
