@@ -43,7 +43,7 @@ resource "aws_db_instance" "postgres" {
   deletion_protection     = false
   tags                    = local.tags
   depends_on = [
-    aws_internet_gateway.lumifi-igw,
+    aws_internet_gateway.lumifi-igw[0],
     aws_route_table.lumifi-pub-rt,
     aws_security_group.lumifi_sg
   ]
@@ -74,7 +74,7 @@ resource "aws_db_instance" "postgres" {
 #   apply_immediately      = true
 #   tags                   = local.tags
 #   depends_on = [
-#     aws_internet_gateway.lumifi-igw,
+#     aws_internet_gateway.lumifi-igw[0],
 #     aws_route_table.lumifi-pub-rt,
 #     aws_security_group.lumifi_sg
 #   ]

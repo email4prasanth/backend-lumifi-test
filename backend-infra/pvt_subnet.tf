@@ -22,6 +22,7 @@ resource "aws_eip" "nat" {
 
 # NAT Gateway in public subnet
 resource "aws_nat_gateway" "nat" {
+  count         = terraform.workspace == "dev" ? 1 : 0
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.lumifi_subnets[0].id # ✅ Should point to a public subnet
   tags = {
@@ -30,12 +31,13 @@ resource "aws_nat_gateway" "nat" {
 }
 # Private Route Table
 resource "aws_route_table" "private_rt" {
+  count  = terraform.workspace == "dev" ? 1 : 0
   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
+    nat_gateway_id = aws_nat_gateway.nat[0].id
   }
 
   tags = {
@@ -46,7 +48,7 @@ resource "aws_route_table" "private_rt" {
 resource "aws_route_table_association" "private_assoc" {
   count          = length(aws_subnet.lumifi_private_subnets)
   subnet_id      = aws_subnet.lumifi_private_subnets[count.index].id
-  route_table_id = aws_route_table.private_rt.id
+  route_table_id = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : data.aws_route_tables.existing_private[0].ids[0]
 }
 output "lumifi_private_subnets" {
   value = aws_subnet.lumifi_private_subnets[*].id

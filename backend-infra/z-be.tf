@@ -24,7 +24,7 @@
 #   count = terraform.workspace == "prod" ? 1 : 0
 #   filter {
 #     name   = "vpc-id"
-#     values = [data.aws_vpc.existing.id]
+#     values = [data.aws_vpc.existing[0].id]
 #   }
 # }
 
@@ -264,7 +264,7 @@
 # # ------------------------------
 # output "vpc_name" {
 #   description = "Name of the Lumifi VPC"
-#   value       = aws_vpc.lumifi-vpc.tags["Name"]
+#   value       = terraform.workspace == "prod" ? data.aws_vpc.existing[0].tags["Name"] : aws_vpc.lumifi-vpc[0].tags["Name"]
 # }
 
 # output "vpc_id" {
@@ -298,17 +298,17 @@
 # # ------------------------------
 # output "internet_gateway_name" {
 #   description = "Name of the Internet Gateway"
-#   value       = aws_internet_gateway.lumifi-igw.tags["Name"]
+#   value       = aws_internet_gateway.lumifi-igw[0].tags["Name"]
 # }
 
 # output "public_route_table_name" {
 #   description = "Name of the Public Route Table"
-#   value       = aws_route_table.lumifi-pub-rt.tags["Name"]
+#   value       = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].tags["Name"] : data.aws_route_table.existing[0].tags["Name"]
 # }
 
 # output "private_route_table_name" {
 #   description = "Name of the Private Route Table"
-#   value       = aws_route_table.private_rt.tags["Name"]
+#   value       = terraform.workspace == "dev" ? aws_route_table.private_rt[0].tags["Name"] : data.aws_route_table.existing_private[0].tags["Name"]
 # }
 
 # # ------------------------------
@@ -467,7 +467,7 @@
 #   deletion_protection     = false
 #   tags                    = local.tags
 #   depends_on = [
-#     aws_internet_gateway.lumifi-igw,
+#     aws_internet_gateway.lumifi-igw[0],
 #     aws_route_table.lumifi-pub-rt,
 #     aws_security_group.lumifi_sg
 #   ]
@@ -498,7 +498,7 @@
 # #   apply_immediately      = true
 # #   tags                   = local.tags
 # #   depends_on = [
-# #     aws_internet_gateway.lumifi-igw,
+# #     aws_internet_gateway.lumifi-igw[0],
 # #     aws_route_table.lumifi-pub-rt,
 # #     aws_security_group.lumifi_sg
 # #   ]
@@ -696,9 +696,9 @@
 # resource "aws_subnet" "lumifi_private_subnets" {
 #   count = length(local.avail_zones)
 
-#   vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
-#   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 100)
+#   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index)
 #   availability_zone       = local.avail_zones[count.index]
 #   map_public_ip_on_launch = false
 
@@ -716,6 +716,7 @@
 
 # # NAT Gateway in public subnet
 # resource "aws_nat_gateway" "nat" {
+#   count         = terraform.workspace == "dev" ? 1 : 0
 #   allocation_id = aws_eip.nat.id
 #   subnet_id     = aws_subnet.lumifi_subnets[0].id # ✅ Should point to a public subnet
 #   tags = {
@@ -724,12 +725,13 @@
 # }
 # # Private Route Table
 # resource "aws_route_table" "private_rt" {
+#   count  = terraform.workspace == "dev" ? 1 : 0
 #   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
 
 #   route {
 #     cidr_block     = "0.0.0.0/0"
-#     nat_gateway_id = aws_nat_gateway.nat.id
+#     nat_gateway_id = aws_nat_gateway.nat[0].id
 #   }
 
 #   tags = {
@@ -740,7 +742,7 @@
 # resource "aws_route_table_association" "private_assoc" {
 #   count          = length(aws_subnet.lumifi_private_subnets)
 #   subnet_id      = aws_subnet.lumifi_private_subnets[count.index].id
-#   route_table_id = aws_route_table.private_rt.id
+#   route_table_id = terraform.workspace == "dev" ? aws_route_table.private_rt[0].id : data.aws_route_table.existing_private[0].id
 # }
 # output "lumifi_private_subnets" {
 #   value = aws_subnet.lumifi_private_subnets[*].id
@@ -936,7 +938,7 @@
 # resource "aws_subnet" "lumifi_subnets" {
 #   count = length(local.avail_zones)
 
-#   vpc_id                  = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
 #   cidr_block              = cidrsubnet(local.vpc_cidr, 8, count.index + 1)
 #   availability_zone       = local.avail_zones[count.index]
@@ -950,6 +952,7 @@
 
 # # Internet Gateway for Public Access
 # resource "aws_internet_gateway" "lumifi-igw" {
+#   count  = terraform.workspace == "dev" ? 1 : 0
 #   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
 #   tags = {
@@ -959,13 +962,14 @@
 
 # # Public Route Table Configuration
 # resource "aws_route_table" "lumifi-pub-rt" {
-#   vpc_id     = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
+#   count  = terraform.workspace == "dev" ? 1 : 0
+#   vpc_id = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
-#   depends_on = [aws_internet_gateway.lumifi-igw]
+#   depends_on = [aws_internet_gateway.lumifi-igw[0]]
 
 #   route {
 #     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.lumifi-igw.id
+#     gateway_id = terraform.workspace == "dev" ? aws_internet_gateway.lumifi-igw[0].id : null
 #   }
 
 #   tags = {
@@ -978,7 +982,7 @@
 #   count = length(aws_subnet.lumifi_subnets)
 
 #   subnet_id      = aws_subnet.lumifi_subnets[count.index].id
-#   route_table_id = aws_route_table.lumifi-pub-rt.id
+#   route_table_id = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : data.aws_route_table.existing[0].id
 # }
 
 
