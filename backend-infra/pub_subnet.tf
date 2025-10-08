@@ -56,7 +56,7 @@ resource "aws_route_table" "lumifi-pub-rt" {
 # Associate Route Table with All Public Subnets
 resource "aws_route_table_association" "subnet_associations" {
   # count = length(aws_subnet.lumifi_subnets)
-  count = length(local.avail_zones)
+  count = terraform.workspace == "dev" ? length(local.avail_zones) : 0 # Only create in dev
 
   subnet_id      = aws_subnet.lumifi_subnets[count.index].id
   route_table_id = terraform.workspace == "dev" ? aws_route_table.lumifi-pub-rt[0].id : try(data.aws_route_tables.public[0].ids[0], null)
@@ -106,8 +106,8 @@ data "aws_route_tables" "public" {
     values = [data.aws_vpc.existing[0].id]
   }
   filter {
-    name   = "tag:Name"  # Changed from "tag:Tier"
-    values = ["*MainRT*"]  # Looks for Name tags containing "MainRT"
+    name   = "tag:Name"   # Changed from "tag:Tier"
+    values = ["*MainRT*"] # Looks for Name tags containing "MainRT"
   }
 }
 # ------------------------------
