@@ -30,9 +30,9 @@ resource "aws_db_instance" "postgres" {
   parameter_group_name      = "default.postgres15"
   skip_final_snapshot       = terraform.workspace == "dev" ? true : false
   final_snapshot_identifier = terraform.workspace == "prod" ? "${terraform.workspace}-lumifi-db-final-snapshot" : null
-  # vpc_security_group_ids    = [aws_security_group.rds.id]
+  # vpc_security_group_ids    = [aws_security_group.rds_public.id]
   # db_subnet_group_name      = aws_db_subnet_group.public_db.name
-  vpc_security_group_ids = [aws_security_group.rds[0].id]
+  vpc_security_group_ids = [aws_security_group.rds_public[0].id]
   db_subnet_group_name   = aws_db_subnet_group.public_db[0].name
   publicly_accessible    = true
   apply_immediately      = true
@@ -68,7 +68,7 @@ resource "aws_db_instance" "postgres" {
 #   # parameter_group_name   = "default.postgres15"
 #   parameter_group_name   = aws_db_parameter_group.lumifi_pg.name
 #   skip_final_snapshot    = terraform.workspace == "dev" ? true : false
-#   vpc_security_group_ids = [aws_security_group.rds.id]
+#   vpc_security_group_ids = [aws_security_group.rds_public.id]
 #   db_subnet_group_name   = aws_db_subnet_group.public_db.name
 #   publicly_accessible    = true
 #   apply_immediately      = true
