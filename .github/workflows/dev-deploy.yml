@@ -208,7 +208,7 @@ jobs:
       - name: Create dev.env.yml
         run: |
           # Convert comma-separated SUBNET_IDS to YAML array format
-          SUBNET_IDS_YAML=$(echo "$SUBNET_IDS" | tr ',' '\n' | sed 's/^/  - /')
+          SUBNET_IDS_YAML=$(echo "$SUBNET_IDS" | tr ',' '\n' | sed 's/^/    - /')
           cat <<EOF > dev.env.yml
             DB_HOST: ${{ env.DB_HOST }}
             DB_NAME: ${{ env.DB_NAME }}
