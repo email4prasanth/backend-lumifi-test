@@ -9,6 +9,8 @@ custom:
   #   env: ${file(./env.yml):${opt:stage, self:provider.stage, 'dev'}}
   # env: ${file(./${opt:stage, self:provider.stage}.env.yml):${opt:stage, self:provider.stage}}
   env: ${file(./${sls:stage}.env.yml)}
+  # Dynamic VPC configuration based on stage
+  vpc: ${self:custom.vpcSettings.${sls:stage}}
 
   # Define VPC settings for each stage
   vpcSettings:
@@ -37,8 +39,7 @@ provider:
   endpointType: REGIONAL
   versionFunctions: true  # Enable Lambda versioning
 
-  # Dynamic VPC configuration based on stage
-  vpc: ${self:custom.vpcSettings.${sls:stage}}
+
 
   httpApi:
     shouldStartNameWithService: true
