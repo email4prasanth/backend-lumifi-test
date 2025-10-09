@@ -231,7 +231,9 @@ jobs:
             S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.DEV_S3_AUDIT_LOG_BACKUP_BUCKET }}
 
             LAMBDA_SG_ID: $LAMBDA_SG_ID
-            SUBNET_IDS: $SUBNET_IDS
+            SUBNET_IDS: for subnet in $(echo "$SUBNET_IDS" | tr ',' ' '); do
+            echo "  - $subnet" >> dev.env.yml
+            done
           EOF
 
           # Create debug file with actual secret values
