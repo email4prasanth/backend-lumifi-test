@@ -207,6 +207,8 @@ jobs:
 
       - name: Create dev.env.yml
         run: |
+          # Convert comma-separated SUBNET_IDS to YAML array format
+          SUBNET_IDS_YAML=$(echo "$SUBNET_IDS" | tr ',' '\n' | sed 's/^/  - /')
           cat <<EOF > dev.env.yml
             DB_HOST: ${{ env.DB_HOST }}
             DB_NAME: ${{ env.DB_NAME }}
@@ -231,9 +233,7 @@ jobs:
             S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.DEV_S3_AUDIT_LOG_BACKUP_BUCKET }}
 
             LAMBDA_SG_ID: $LAMBDA_SG_ID
-            SUBNET_IDS: for subnet in $(echo "$SUBNET_IDS" | tr ',' ' '); do
-            echo "  - $subnet" >> dev.env.yml
-            done
+            SUBNET_IDS: $SUBNET_IDS
           EOF
 
           # Create debug file with actual secret values
@@ -251,6 +251,16 @@ jobs:
             S3_EXPORT_BUCKET_ROOT_PATH= ${{ secrets.S3_EXPORT_BUCKET_ROOT_PATH }}
             S3_AUDIT_LOG_BACKUP_BUCKET= ${{ secrets.S3_AUDIT_LOG_BACKUP_BUCKET }}
           EOF
+
+      - name: Debug environment files
+        run: |
+          echo "=== Checking dev.env.yml ==="
+          cat dev.env.yml
+          echo "=== Checking if variables exist ==="
+          echo "LAMBDA_SG_ID: $LAMBDA_SG_ID"
+          echo "SUBNET_IDS: $SUBNET_IDS"
+          echo "=== File location ==="
+          pwd
           ls -la dev.env.debug
 
           # Show non-sensitive parts of dev.env.yml
