@@ -38,7 +38,7 @@ provider:
   versionFunctions: true  # Enable Lambda versioning
 
   # Dynamic VPC configuration based on stage
-  vpc: ${self:custom.vpcConfig.${sls:stage}}
+  vpc: ${self:custom.vpcSettings.${sls:stage}}
 
   httpApi:
     shouldStartNameWithService: true
