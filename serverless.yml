@@ -46,9 +46,10 @@ provider:
 
   httpApi:
     shouldStartNameWithService: true
-    accessLogs:
-      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+
     cors:
+      accessLogs:
+        format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
       allowedOrigins:
         # - 'https://app-dev.lumifidental.com' # Use your frontend URL instead of '*'
         - ${self:custom.env.FE_APP_URL} # # Dynamically loaded from env.yml
@@ -140,6 +141,7 @@ provider:
 
     LAMBDA_SG_ID: ${self:custom.env.LAMBDA_SG_ID}
     SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
+    SUBNET_IDS: $(echo "$SUBNET_IDS" | tr ',' ',')
 
 package:
   patterns:
