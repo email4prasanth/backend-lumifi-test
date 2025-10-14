@@ -46,6 +46,7 @@ provider:
 
   httpApi:
     shouldStartNameWithService: true
+
     cors:
       accessLogs:
         format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
