@@ -265,10 +265,10 @@ jobs:
           name: dev-env-debug
           path: dev.env.debug
 
-      # - name: Deploy Serverless App & API Gateway Endpoints
-      #   run: |
-      #     export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
-      #     sls deploy --stage $ENVIRONMENT
+      - name: Deploy Serverless App & API Gateway Endpoints
+        run: |
+          export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
+          sls deploy --stage $ENVIRONMENT
           
 
 
