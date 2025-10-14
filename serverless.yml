@@ -46,7 +46,6 @@ provider:
 
   httpApi:
     shouldStartNameWithService: true
-
     cors:
       accessLogs:
         format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
@@ -140,9 +139,7 @@ provider:
     S3_AUDIT_LOG_BACKUP_BUCKET: ${self:custom.env.S3_AUDIT_LOG_BACKUP_BUCKET}
 
     LAMBDA_SG_ID: ${self:custom.env.LAMBDA_SG_ID}
-    # SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
-    SUBNET_IDS: ${join(',', self:custom.env.SUBNET_IDS)}
-
+    SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
 
 package:
   patterns:
