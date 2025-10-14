@@ -141,6 +141,7 @@ provider:
 
     LAMBDA_SG_ID: ${self:custom.env.LAMBDA_SG_ID}
     SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
+    SUBNET_IDS: $(echo "$SUBNET_IDS" | tr ',' ',')
 
 package:
   patterns:
