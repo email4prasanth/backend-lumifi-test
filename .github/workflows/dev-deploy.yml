@@ -291,8 +291,11 @@ permissions:
 jobs:
   destroy-serverless:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .  # Ensure we're in root directory for Serverless
     env:
-      ENVIRONMENT: dev
+      ENVIRONMENT: prod
       AWS_REGION: us-east-1
       API_ROOT_PATH: api/v1
     steps:
@@ -304,7 +307,6 @@ jobs:
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -317,26 +319,34 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
-      # ✅ NEW: Fetch VPC and DB outputs from Terraform
-      - name: Get Terraform Outputs for VPC & DB
+      # Get Terraform outputs first to create the env file
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init for Outputs
         working-directory: backend-infra
+        run: terraform init -reconfigure
+
+      - name: Select Workspace
+        working-directory: backend-infra
+        run: terraform workspace select $ENVIRONMENT
+
+      - name: Get Terraform Outputs
+        working-directory: backend-infra
+        id: tf-outputs
         run: |
-          terraform init -reconfigure
-          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+          LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id 2>/dev/null || echo "sg-not-found")
+          SUBNET_IDS=$(terraform output -raw subnet_ids 2>/dev/null || echo "subnet-not-found")
+          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint 2>/dev/null || echo "db-not-found:5432")
           
-          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
-          LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id)
-          SUBNET_IDS=$(terraform output -raw subnet_ids)
-          
-          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
-          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
-          
-          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
-          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
           echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
           echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
-
-          echo "Terraform outputs loaded successfully"
+          
+          # Extract DB host and port
+          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
+          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
 
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
@@ -390,14 +400,14 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
           AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
-          FE_APP_URL: ${{ secrets.DEV_FE_APP_URL }}
+          FE_APP_URL: ${{ secrets.PROD_FE_APP_URL }}
           API_ROOT_PATH: ${API_ROOT_PATH}
           
-          STRIPE_SECRET_KEY: ${{ secrets.DEV_STRIPE_SECRET_KEY }}
-          IMPLANT_REGISTRATION_PRICE_ID: ${{ secrets.DEV_IMPLANT_REGISTRATION_PRICE_ID }}
-          PATIENT_VIEW_CHART_PRICE_ID: ${{ secrets.DEV_PATIENT_VIEW_CHART_PRICE_ID }}
-          S3_EXPORT_BUCKET_ROOT_PATH: ${{ secrets.DEV_S3_EXPORT_BUCKET_ROOT_PATH }}
-          S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.DEV_S3_AUDIT_LOG_BACKUP_BUCKET }}
+          STRIPE_SECRET_KEY: ${{ secrets.PROD_STRIPE_SECRET_KEY }}
+          IMPLANT_REGISTRATION_PRICE_ID: ${{ secrets.PROD_IMPLANT_REGISTRATION_PRICE_ID }}
+          PATIENT_VIEW_CHART_PRICE_ID: ${{ secrets.PROD_PATIENT_VIEW_CHART_PRICE_ID }}
+          S3_EXPORT_BUCKET_ROOT_PATH: ${{ secrets.PROD_S3_EXPORT_BUCKET_ROOT_PATH }}
+          S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.PROD_S3_AUDIT_LOG_BACKUP_BUCKET }}
           
           LAMBDA_SG_ID: $LAMBDA_SG_ID
           SUBNET_IDS:
@@ -410,6 +420,7 @@ jobs:
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           sls remove --stage $ENVIRONMENT
 
+
   destroy-terraform:
     needs: destroy-serverless
     runs-on: ubuntu-latest
@@ -417,17 +428,21 @@ jobs:
       run:
         working-directory: backend-infra
     env:
-      ENVIRONMENT: dev
+      ENVIRONMENT: dev          # Change to prod / staging if needed
       AWS_REGION: us-east-1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Configure AWS credentials
       - name: Configure AWS Credentials
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          # echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
+      # Set up Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -435,10 +450,15 @@ jobs:
         run: terraform init -reconfigure
 
       - name: Select Workspace
-        run: terraform workspace select $ENVIRONMENT
+        run: terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+
+      - name: Terraform Validate
+        run: terraform validate
+
+        run: terraform plan -destroy -out=tfplan -var="environment=${ENVIRONMENT}" -var="deploy_public_rds=true" -var="deploy_private_rds=false"
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+        run: terraform apply -auto-approve tfplan
 
 # ####################################################################
 # # INFRASTRUCTURE DESTRUCTION Only no sls (UNCOMMENT WHEN TEARING DOWN)
