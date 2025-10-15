@@ -289,8 +289,7 @@ permissions:
   id-token: write
 
 jobs:
-  deploy-serverless:
-    needs: aws-resources-deploy
+  destroy-serverless:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: prod
