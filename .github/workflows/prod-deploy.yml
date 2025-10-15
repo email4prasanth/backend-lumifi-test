@@ -317,6 +317,21 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
+      - name: Download DB outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: db-env-vars
+          path: ./
+
+      - name: Load DB variables
+        run: |
+          # Load variables from file
+          source ./db_outputs.env
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
+          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
+
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
         run: |
