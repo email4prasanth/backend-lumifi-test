@@ -447,7 +447,9 @@
 name: Destroy lumifi backend Infrastructure from production environment
 
 on:
-  workflow_dispatch:  # Use workflow_dispatch for manual destruction
+  push:
+    branches:
+      - production-test
 
 permissions:
   contents: read
