@@ -220,7 +220,7 @@ jobs:
 
           SLS_AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
           SLS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: us-east-1
             
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
@@ -244,7 +244,7 @@ jobs:
           cat <<EOF > prod.env.debug
             SLS_AWS_ACCESS_KEY_ID= ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
             SLS_AWS_SECRET_ACCESS_KEY= ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION= ${{ secrets.AWS_REGION }}
+            AWS_REGION: us-east-1
             JWT_SECRET= ${{ secrets.JWT_SECRET }}
             PG_ENCRYPT_SECRET= ${{ secrets.PG_ENCRYPT_SECRET }}
             AWS_SES_SENDER_EMAIL= ${{ secrets.AWS_SES_SENDER_EMAIL }}
