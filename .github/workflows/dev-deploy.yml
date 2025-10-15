@@ -209,8 +209,8 @@ jobs:
         run: |
           # Convert comma-separated SUBNET_IDS to YAML array format
           SUBNET_IDS_YAML=$(echo "$SUBNET_IDS" | tr ',' '\n' | sed 's/^/      - /')
-          # # String version (comma-separated, for env vars)
-          # SUBNET_IDS_STRING=$(echo "$SUBNET_IDS_YAML" | sed 's/^[[:space:]]*-\s*//' | tr '\n' ',' | sed 's/,$//')
+          # String version (comma-separated, for env vars)
+          SUBNET_IDS_STRING=$(echo "$SUBNET_IDS_YAML" | sed 's/^[[:space:]]*-\s*//' | tr '\n' ',' | sed 's/,$//')
           cat <<EOF > dev.env.yml
           DB_HOST: ${{ env.DB_HOST }}
           DB_NAME: ${{ env.DB_NAME }}
@@ -237,6 +237,7 @@ jobs:
           LAMBDA_SG_ID: $LAMBDA_SG_ID
           SUBNET_IDS:
           $SUBNET_IDS_YAML
+          SUBNET_IDS_STRING: "$SUBNET_IDS_STRING"
           EOF
     
     
