@@ -128,7 +128,7 @@ logs:
 
     SLS_AWS_ACCESS_KEY_ID: ${self:custom.env.SLS_AWS_ACCESS_KEY_ID}
     SLS_AWS_SECRET_ACCESS_KEY: ${self:custom.env.SLS_AWS_SECRET_ACCESS_KEY}
-    SLS_AWS_REGION: us-east-1
+    SLS_AWS_REGION: ${self:custom.env.AWS_REGION}
 
     JWT_SECRET: ${self:custom.env.JWT_SECRET}
     PG_ENCRYPT_SECRET: ${self:custom.env.PG_ENCRYPT_SECRET}
