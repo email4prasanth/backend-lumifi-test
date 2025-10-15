@@ -333,11 +333,11 @@ jobs:
         run: |
           LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id)
           echo "Lambda sg: $LAMBDA_SG_ID"
-          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> db_outputs.env
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
 
           SUBNET_IDS=$(terraform output -raw subnet_ids)
           echo "Subnet id: $SUBNET_IDS"
-          echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
+          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
 
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
