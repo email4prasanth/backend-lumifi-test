@@ -317,26 +317,27 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
-      # ✅ NEW: Fetch VPC and DB outputs from Terraform
-      - name: Get Terraform Outputs for VPC & DB
-        working-directory: backend-infra
+
+      # ✅ NEW: Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Select/Create Workspace
         run: |
-          terraform init -reconfigure
           terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
           
-          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
+      - name: Terraform output
+        run: |
           LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id)
-          SUBNET_IDS=$(terraform output -raw subnet_ids)
-          
-          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
-          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
-          
-          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
-          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
-          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
-          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
+          echo "Lambda sg: $LAMBDA_SG_ID"
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> db_outputs.env
 
-          echo "Terraform outputs loaded successfully"
+          SUBNET_IDS=$(terraform output -raw subnet_ids)
+          echo "Subnet id: $SUBNET_IDS"
+          echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
 
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
