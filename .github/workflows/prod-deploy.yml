@@ -625,4 +625,4 @@ jobs:
         run: terraform plan -destroy -out=tfplan -var="environment=${ENVIRONMENT}" -var="deploy_public_rds=true" -var="deploy_private_rds=false"
 
       - name: Terraform Destroy
-        run: terraform apply -auto-approve -out=tfplan -var="environment=${ENVIRONMENT}" -var="deploy_public_rds=true" -var="deploy_private_rds=false"
+        run: terraform apply -auto-approve tfplan
