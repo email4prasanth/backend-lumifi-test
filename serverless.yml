@@ -8,8 +8,8 @@ custom:
   # Dynamically load environment variables based on the stage (dev or prod)
   # env: ${file(./${sls:stage}.env.yml):${sls:stage}}
   env: ${file(./${sls:stage}.env.yml)}
-  # Dynamic VPC configuration based on stage
-  vpc: ${self:custom.vpcSettings.${sls:stage}}
+  # # Dynamic VPC configuration based on stage
+  # vpc: ${self:custom.vpcSettings.${sls:stage}}
 
   # Define VPC settings for each stage
   vpcSettings:
@@ -17,16 +17,18 @@ custom:
       securityGroupIds:
         # - ${self:custom.env.${sls:stage}.LAMBDA_SG_ID}
         - ${self:custom.env.LAMBDA_SG_ID}
-      subnetIds:
-        # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
-        - ${self:custom.env.SUBNET_IDS}
+      subnetIds: ${self:custom.env.SUBNET_IDS}
+      # subnetIds:
+      #   # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
+      #   - ${self:custom.env.SUBNET_IDS}
     prod:
       securityGroupIds:
         # - ${self:custom.env.${sls:stage}.LAMBDA_SG_ID}
         - ${self:custom.env.LAMBDA_SG_ID}
-      subnetIds:
-        # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
-        - ${self:custom.env.SUBNET_IDS}
+      subnetIds: ${self:custom.env.SUBNET_IDS}
+      # subnetIds:
+      #   # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
+      #   - ${self:custom.env.SUBNET_IDS}
   prune:
     automatic: true      # Run pruning after each deployment
     number: 3           # Keep the 3 latest versions
@@ -41,7 +43,8 @@ provider:
   # Explicitly configure regional API endpoint
   endpointType: REGIONAL
   versionFunctions: true  # Enable Lambda versioning
-
+  # Dynamic VPC configuration based on stage
+  vpc: ${self:custom.vpcSettings.${sls:stage}}
 
 
   httpApi:
@@ -71,9 +74,9 @@ provider:
         - PUT
         - DELETE
         - PATCH
-logs:
-  httpApi:
-    format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+# logs:
+#   httpApi:
+#     format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
 
   # To disable API Gateway creation
   apiGateway:
