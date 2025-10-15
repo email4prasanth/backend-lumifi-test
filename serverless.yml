@@ -17,16 +17,18 @@ custom:
       securityGroupIds:
         # - ${self:custom.env.${sls:stage}.LAMBDA_SG_ID}
         - ${self:custom.env.LAMBDA_SG_ID}
-      subnetIds:
-        # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
-        - ${self:custom.env.SUBNET_IDS}
+      subnetIds: ${self:custom.env.SUBNET_IDS}
+      # subnetIds:
+      #   # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
+      #   - ${self:custom.env.SUBNET_IDS}
     prod:
       securityGroupIds:
         # - ${self:custom.env.${sls:stage}.LAMBDA_SG_ID}
         - ${self:custom.env.LAMBDA_SG_ID}
-      subnetIds:
-        # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
-        - ${self:custom.env.SUBNET_IDS}
+      subnetIds: ${self:custom.env.SUBNET_IDS}
+      # subnetIds:
+      #   # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
+      #   - ${self:custom.env.SUBNET_IDS}
   prune:
     automatic: true      # Run pruning after each deployment
     number: 3           # Keep the 3 latest versions
