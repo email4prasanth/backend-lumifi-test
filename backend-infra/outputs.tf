@@ -107,7 +107,7 @@ output "lambda_security_group_name" {
 
 output "rds_security_group_name" {
   description = "Public RDS Security Group name"
-  value       = var.deploy_public_rds ? aws_security_group.rds[0].name : null
+  value       = var.deploy_public_rds ? aws_security_group.rds_public[0].name : null
 }
 
 output "rds_private_security_group_name" {

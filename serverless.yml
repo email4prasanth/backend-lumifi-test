@@ -1,40 +1,80 @@
-service: lumifi-sls
+service: lumifi-lam-test
 
 frameworkVersion: '>=4.0.0'
 
 custom:
   serverless-offline:
     httpPort: 3001
-#   dev: ${file(./env.yml):dev}
-  env: ${file(./env.yml):${opt:stage, self:provider.stage, 'dev'}}
+  # Dynamically load environment variables based on the stage (dev or prod)
+  # env: ${file(./${sls:stage}.env.yml):${sls:stage}}
+  env: ${file(./${sls:stage}.env.yml)}
+  # Dynamic VPC configuration based on stage
+  vpc: ${self:custom.vpcSettings.${sls:stage}}
+
+  # Define VPC settings for each stage
+  vpcSettings:
+    dev:
+      securityGroupIds:
+        # - ${self:custom.env.${sls:stage}.LAMBDA_SG_ID}
+        - ${self:custom.env.LAMBDA_SG_ID}
+      subnetIds:
+        # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
+        - ${self:custom.env.SUBNET_IDS}
+    prod:
+      securityGroupIds:
+        # - ${self:custom.env.${sls:stage}.LAMBDA_SG_ID}
+        - ${self:custom.env.LAMBDA_SG_ID}
+      subnetIds:
+        # - ${self:custom.env.${sls:stage}.SUBNET_IDS}
+        - ${self:custom.env.SUBNET_IDS}
+  prune:
+    automatic: true      # Run pruning after each deployment
+    number: 3           # Keep the 3 latest versions
+    includeLayers: true  # Also prune Lambda Layers if used
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs22.x
   region: us-east-1
   stage: ${opt:stage, 'dev'}
-  timeout: 29 # Max 900 seconds (15 minutes)
+  timeout: 30 # Max 900 seconds (15 minutes)
   # Explicitly configure regional API endpoint
   endpointType: REGIONAL
+  versionFunctions: true  # Enable Lambda versioning
+
+
+
   httpApi:
-    shouldStartNameWithService: true 
-    accessLogs:
-      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
-    cors: 
-      allowedOrigins: '*'
+    shouldStartNameWithService: true
+    # accessLogs:
+    #   format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+    cors:
+      allowedOrigins:
+        # - 'https://app-dev.lumifidental.com' # Use your frontend URL instead of '*'
+        - ${self:custom.env.FE_APP_URL} # # Dynamically loaded from env.yml
+        - 'http://localhost:3000' # Add localhost for development
       allowedHeaders:
         - Content-Type
         - Authorization
+        - Practice-Id
+        - User-Id
+        - Login-Id
+        - Source-Ip
         - X-Api-Key
-      allowedMethods: '*'
+        - X-Amz-Date
+        - X-Amz-Security-Token
+        - X-Requested-With
+      allowedMethods:
+        - OPTIONS
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+logs:
+  httpApi:
+    format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
 
-  # vpc:
-  #   securityGroupIds:
-  #     - ${self:custom.env.LAMBDA_SG_ID}
-  #   subnetIds: 
-  #     - ${self:custom.env.SUBNET_IDS.split(',')[0]}
-  #     - ${self:custom.env.SUBNET_IDS.split(',')[1]}
-      
   # To disable API Gateway creation
   apiGateway:
     disableDefaultEndpoint: false
@@ -46,47 +86,79 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - "logs:CreateLogGroup"
-            - "logs:CreateLogStream"
-            - "logs:PutLogEvents"
-          Resource: "arn:aws:logs:*:*:*"
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+          Resource: 'arn:aws:logs:*:*:*'
         - Effect: Allow
           Action:
-            - "rds-db:connect"
-          Resource: "*"
+            - 'rds-db:connect'
+            - 'sts:AssumeRole'
+            - 'secretsmanager:GetSecretValue'
+            - 'rds:*'
+            - 'events:*'
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - 'lambda:ListVersionsByFunction'
+            - 'lambda:DeleteFunction'
+            - 'lambda:ListAliases'
+            - 'lambda:DeleteLayerVersion'
+            - 'lambda:ListLayerVersions'
+          Resource: '*'
+        # VPC-specific permissions :cite[1]
+        - Effect: Allow
+          Action:
+            - 'ec2:CreateNetworkInterface'
+            - 'ec2:DescribeNetworkInterfaces'
+            - 'ec2:DeleteNetworkInterface'
+            - 'ec2:AssignPrivateIpAddresses'
+            - 'ec2:UnassignPrivateIpAddresses'
+          Resource: '*'
 
   logs:
     httpApi: true
 
   environment:
-    API_ROOT_PATH: ${self:custom.env.API_ROOT_PATH}
-    JWT_SECRET: ${self:custom.env.JWT_SECRET}
     DB_HOST: ${self:custom.env.DB_HOST}
+    DB_NAME: ${self:custom.env.DB_NAME}
     DB_USER: ${self:custom.env.DB_USER}
     DB_PASSWORD: ${self:custom.env.DB_PASSWORD}
-    DB_NAME: ${self:custom.env.DB_NAME}
     DB_PORT: ${self:custom.env.DB_PORT}
+
+    SLS_AWS_ACCESS_KEY_ID: ${self:custom.env.SLS_AWS_ACCESS_KEY_ID}
+    SLS_AWS_SECRET_ACCESS_KEY: ${self:custom.env.SLS_AWS_SECRET_ACCESS_KEY}
+    SLS_AWS_REGION: ${self:custom.env.AWS_REGION}
+
+    JWT_SECRET: ${self:custom.env.JWT_SECRET}
     PG_ENCRYPT_SECRET: ${self:custom.env.PG_ENCRYPT_SECRET}
-    # AWS_ACCESS_KEY_ID: ${self:custom.env.AWS_ACCESS_KEY_ID}
-    # AWS_SECRET_ACCESS_KEY: ${self:custom.env.AWS_SECRET_ACCESS_KEY}
-    # AWS_REGION: ${self:custom.env.AWS_REGION}
     AWS_SES_SENDER_EMAIL: ${self:custom.env.AWS_SES_SENDER_EMAIL}
     FE_APP_URL: ${self:custom.env.FE_APP_URL}
+    API_ROOT_PATH: ${self:custom.env.API_ROOT_PATH}
+
+    STRIPE_SECRET_KEY: ${self:custom.env.STRIPE_SECRET_KEY}
+    IMPLANT_REGISTRATION_PRICE_ID: ${self:custom.env.IMPLANT_REGISTRATION_PRICE_ID}
+    PATIENT_VIEW_CHART_PRICE_ID: ${self:custom.env.PATIENT_VIEW_CHART_PRICE_ID}
+    S3_EXPORT_BUCKET_ROOT_PATH: ${self:custom.env.S3_EXPORT_BUCKET_ROOT_PATH}
+    S3_AUDIT_LOG_BACKUP_BUCKET: ${self:custom.env.S3_AUDIT_LOG_BACKUP_BUCKET}
+
     LAMBDA_SG_ID: ${self:custom.env.LAMBDA_SG_ID}
-    SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
-    
+    # SUBNET_IDS: ${self:custom.env.SUBNET_IDS}
+    # SUBNET_IDS: ${join(',', self:custom.env.SUBNET_IDS)}
+    SUBNET_IDS: ${self:custom.env.SUBNET_IDS_STRING}
+
 
 package:
   patterns:
-    - '!./**'           # Exclude everything
-    - 'dist/**'         # Include compiled JS
+    - '!./**' # Exclude everything
+    - 'dist/**' # Include compiled JS
     - 'node_modules/**' # Include dependencies
-    - '!node_modules/aws-sdk/**'  # Exclude AWS SDK
+    - '!node_modules/aws-sdk/**' # Exclude AWS SDK
   individually: false
-
 
 plugins:
   - serverless-offline
+  - serverless-prune-plugin
 
 functions:
   api:
@@ -97,88 +169,22 @@ functions:
           path: /hello
           method: GET
 
-  practiceHandlerFunction:
-    timeout: 29 # Max 900 seconds (15 minutes)
-    handler: dist/handler.practiceHandler
+  cleanupAwsExportsCronFunction:
+    handler: dist/handler.cleanupAwsExportsCron
+    events:
+      - schedule: cron(0 0 ? * SUN *) # Every Sunday at 00:00:00 UTC
+
+  backupAuditLogsCronFunction:
+    handler: dist/handler.backupAuditLogsCron
+    events:
+      - schedule: cron(0 0 1 * ? *) # 1st day of every month at 00:00:00 UTC
+
+  commonHandlerFunction:
+    timeout: 30 # Max 900 seconds (15 minutes)
+    handler: dist/handler.commonHandler
     events:
       - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/practice/software
-          method: GET
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/practice/speciality
-          method: GET
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/practice
-          method: GET
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/practice/register
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/practice/update
-          method: PUT
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/practice/accountAdminAvailability
-          method: GET
-
-  userHandlerFunction:
-    timeout: 29 # Max 900 seconds (15 minutes)
-    handler: dist/handler.userHandler
-    events:
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/user/role
-          method: GET
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/user/list
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/user/detail
-          method: GET
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/user/create
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/user/update
-          method: PUT
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/user/delete
-          method: DELETE
-
-  stateHandlerFunction:
-    timeout: 29 # Max 900 seconds (15 minutes)
-    handler: dist/handler.stateHandler
-    events:
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/state/list
-          method: GET
-
-  authHandlerFunction:
-    timeout: 29 # Max 900 seconds (15 minutes)
-    handler: dist/handler.authHandler
-    events:
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/login
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/selectLoginPracticeAccount
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/verifyOtp
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/completion
+          path: /${self:custom.env.API_ROOT_PATH}/auth/refreshToken
           method: POST
 
       - httpApi:
@@ -186,57 +192,401 @@ functions:
           method: POST
 
       - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/refreshToken
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/me
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/setPassword
-          method: POST
-
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/forgotPassword
+          path: /${self:custom.env.API_ROOT_PATH}/notification/list
           method: GET
 
       - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/auth/resetPassword
+          path: /${self:custom.env.API_ROOT_PATH}/notification/markAsRead
           method: POST
 
-  securityHandlerFunction:
-    timeout: 29 # Max 900 seconds (15 minutes)
-    handler: dist/handler.securityHandler
-    events:
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/security/update
-          method: PUT
+  # practiceHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.practiceHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/software
+  #         method: GET
 
-  patientHandlerFunction:
-    timeout: 29 # Max 900 seconds (15 minutes)
-    handler: dist/handler.patientHandler
-    events:
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/patient/create
-          method: POST
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/speciality
+  #         method: GET
 
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/patient/update
-          method: PUT
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice
+  #         method: GET
 
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/patient/delete
-          method: DELETE
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/register
+  #         method: POST
 
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/patient/detail
-          method: GET
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/update
+  #         method: PUT
 
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/patient/list
-          method: POST
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/accountAdminAvailability
+  #         method: GET
 
-      - httpApi:
-          path: /${self:custom.env.API_ROOT_PATH}/patient/search
-          method: POST
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/ownerValidation
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/deactivate
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/practice/reactivate
+  #         method: POST
+
+  # userHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.userHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/user/role
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/user/list
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/user/detail
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/user/create
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/user/update
+  #         method: PUT
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/user/delete
+  #         method: DELETE
+
+  # stateHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.stateHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/state/list
+  #         method: GET
+
+  # authHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.authHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/login
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/selectLoginPracticeAccount
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/completion
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/me
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/setPassword
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/forgotPassword
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/resetPassword
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/auth/verifyOtp
+  #         method: POST
+
+  # securityHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.securityHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/security/update
+  #         method: PUT
+
+  # patientHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.patientHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/patient/create
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/patient/update
+  #         method: PUT
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/patient/delete
+  #         method: DELETE
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/patient/detail
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/patient/list
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/patient/search
+  #         method: POST
+
+  # implantHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.implantHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/dump
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/manufacturer
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/type
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/size
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/doctor
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/add
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/update
+  #         method: PUT
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/doctor/existance
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/detail
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/note/create
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/implant/note/update
+  #         method: PUT
+
+  # chartHandlerFunction:
+  #   timeout: 30 # Max 900 seconds (15 minutes)
+  #   handler: dist/handler.chartHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/chart/detail
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/chart/patientTransaction
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/chart/patientTransaction/export
+  #         method: POST
+
+  # paymentHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.paymentHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/canAccessPatient
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/hasPaymentAccount
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/create
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/reportUsage
+  #         method: POST
+
+  # webhookHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.webhookHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/webhook/listenSubscriptionCompletion
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/webhook/listenInvoice
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/payment/webhook/listenCustomer
+  #         method: POST
+
+  # practiceAnalyticsHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.practiceAnalyticsHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/dashboard/practice/metric
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/dashboard/practice/earning
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/dashboard/practice/transaction
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/dashboard/practice/transaction/export
+  #         method: POST
+
+  # referralHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.referralHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/referral/invitation
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/referral/resendInvitation
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/referral/validateToken
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/referral/creditList
+  #         method: POST
+
+  # systemUserAuthHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.systemUserAuthHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/auth/login
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/auth/completion
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/auth/me
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/auth/verifyOtp
+  #         method: POST
+
+  # systemUserHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.systemUserHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/user/create
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/user/list
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/user/detail
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/user/update
+  #         method: PUT
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/user/delete
+  #         method: DELETE
+
+  # systemAnalyticHandlerFunction:
+  #   timeout: 30
+  #   handler: dist/handler.systemAnalyticHandler
+  #   events:
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/metric
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practiceActivity/list
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practiceActivity/export
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/detail
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/metric
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/credit
+  #         method: GET
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/creditActivity
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/referral/resendInvitation
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/earning
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/user
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/transaction/list
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/transaction/export
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/adjustCredit
+  #         method: POST
+
+  #     - httpApi:
+  #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/verifyDoctor
+  #         method: POST
