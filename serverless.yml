@@ -46,8 +46,8 @@ provider:
 
   httpApi:
     shouldStartNameWithService: true
-    accessLogs:
-      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
+    # accessLogs:
+    #   format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
     cors:
       allowedOrigins:
         # - 'https://app-dev.lumifidental.com' # Use your frontend URL instead of '*'
@@ -71,6 +71,9 @@ provider:
         - PUT
         - DELETE
         - PATCH
+logs:
+  httpApi:
+    format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":"$context.status","responseLatency":"$context.responseLatency"}'
 
   # To disable API Gateway creation
   apiGateway:
@@ -93,6 +96,7 @@ provider:
             - 'sts:AssumeRole'
             - 'secretsmanager:GetSecretValue'
             - 'rds:*'
+            - 'events:*'
           Resource: '*'
         - Effect: Allow
           Action:
