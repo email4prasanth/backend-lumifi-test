@@ -317,6 +317,10 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
+      # ✅ NEW: Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        
       # ✅ NEW: Fetch VPC and DB outputs from Terraform
       - name: Get Terraform Outputs for VPC & DB
         working-directory: backend-infra
