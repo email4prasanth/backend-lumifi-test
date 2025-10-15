@@ -207,31 +207,37 @@ jobs:
 
       - name: Create prod.env.yml
         run: |
+          # Convert comma-separated SUBNET_IDS to YAML array format
+          SUBNET_IDS_YAML=$(echo "$SUBNET_IDS" | tr ',' '\n' | sed 's/^/      - /')
+          # String version (comma-separated, for env vars)
+          SUBNET_IDS_STRING=$(echo "$SUBNET_IDS_YAML" | sed 's/^[[:space:]]*-\s*//' | tr '\n' ',' | sed 's/,$//')
           cat <<EOF > prod.env.yml
-            DB_HOST: ${{ env.DB_HOST }}
-            DB_NAME: ${{ env.DB_NAME }}
-            DB_USER: ${{ env.DB_USER }}
-            DB_PASSWORD: ${{ env.DB_PASSWORD }}
-            DB_PORT: ${{ env.DB_PORT }}
+          DB_HOST: ${{ env.DB_HOST }}
+          DB_NAME: ${{ env.DB_NAME }}
+          DB_USER: ${{ env.DB_USER }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+          DB_PORT: ${{ env.DB_PORT }}
 
-            SLS_AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
-            SLS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION: ${{ secrets.AWS_REGION }}
+          SLS_AWS_ACCESS_KEY_ID: ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
+          SLS_AWS_SECRET_ACCESS_KEY: ${{ secrets.SLS_AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
             
-            JWT_SECRET: ${{ secrets.JWT_SECRET }}
-            PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
-            AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
-            FE_APP_URL: ${{ secrets.PROD_FE_APP_URL }}
-            API_ROOT_PATH: ${API_ROOT_PATH}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
+          AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
+          FE_APP_URL: ${{ secrets.PROD_FE_APP_URL }}
+          API_ROOT_PATH: ${API_ROOT_PATH}
 
-            STRIPE_SECRET_KEY: ${{ secrets.PROD_STRIPE_SECRET_KEY }}
-            IMPLANT_REGISTRATION_PRICE_ID: ${{ secrets.PROD_IMPLANT_REGISTRATION_PRICE_ID }}
-            PATIENT_VIEW_CHART_PRICE_ID: ${{ secrets.PROD_PATIENT_VIEW_CHART_PRICE_ID }}
-            S3_EXPORT_BUCKET_ROOT_PATH: ${{ secrets.PROD_S3_EXPORT_BUCKET_ROOT_PATH }}
-            S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.PROD_S3_AUDIT_LOG_BACKUP_BUCKET }}
+          STRIPE_SECRET_KEY: ${{ secrets.PROD_STRIPE_SECRET_KEY }}
+          IMPLANT_REGISTRATION_PRICE_ID: ${{ secrets.PROD_IMPLANT_REGISTRATION_PRICE_ID }}
+          PATIENT_VIEW_CHART_PRICE_ID: ${{ secrets.PROD_PATIENT_VIEW_CHART_PRICE_ID }}
+          S3_EXPORT_BUCKET_ROOT_PATH: ${{ secrets.PROD_S3_EXPORT_BUCKET_ROOT_PATH }}
+          S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.PROD_S3_AUDIT_LOG_BACKUP_BUCKET }}
 
-            LAMBDA_SG_ID: $LAMBDA_SG_ID
-            SUBNET_IDS: $SUBNET_IDS
+          LAMBDA_SG_ID: $LAMBDA_SG_ID
+          SUBNET_IDS:
+          $SUBNET_IDS_YAML
+          SUBNET_IDS_STRING: "$SUBNET_IDS_STRING"
           EOF
 
           # Create debug file with actual secret values

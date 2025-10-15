@@ -589,4 +589,4 @@ functions:
 
   #     - httpApi:
   #         path: /${self:custom.env.API_ROOT_PATH}/system/practice/verifyDoctor
-  #         method: POS
+  #         method: POST

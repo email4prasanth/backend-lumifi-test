@@ -240,7 +240,6 @@ jobs:
           SUBNET_IDS_STRING: "$SUBNET_IDS_STRING"
           EOF
     
-    
           # Create debug file with actual secret values
           cat <<EOF > dev.env.debug
             SLS_AWS_ACCESS_KEY_ID= ${{ secrets.SLS_AWS_ACCESS_KEY_ID }}
