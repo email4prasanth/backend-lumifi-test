@@ -295,7 +295,7 @@ jobs:
       run:
         working-directory: .  # Ensure we're in root directory for Serverless
     env:
-      ENVIRONMENT: prod
+      ENVIRONMENT: dev
       AWS_REGION: us-east-1
       API_ROOT_PATH: api/v1
     steps:
@@ -400,14 +400,14 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           PG_ENCRYPT_SECRET: ${{ secrets.PG_ENCRYPT_SECRET }}
           AWS_SES_SENDER_EMAIL: ${{ secrets.AWS_SES_SENDER_EMAIL }}
-          FE_APP_URL: ${{ secrets.PROD_FE_APP_URL }}
+          FE_APP_URL: ${{ secrets.DEV_FE_APP_URL }}
           API_ROOT_PATH: ${API_ROOT_PATH}
           
-          STRIPE_SECRET_KEY: ${{ secrets.PROD_STRIPE_SECRET_KEY }}
-          IMPLANT_REGISTRATION_PRICE_ID: ${{ secrets.PROD_IMPLANT_REGISTRATION_PRICE_ID }}
-          PATIENT_VIEW_CHART_PRICE_ID: ${{ secrets.PROD_PATIENT_VIEW_CHART_PRICE_ID }}
-          S3_EXPORT_BUCKET_ROOT_PATH: ${{ secrets.PROD_S3_EXPORT_BUCKET_ROOT_PATH }}
-          S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.PROD_S3_AUDIT_LOG_BACKUP_BUCKET }}
+          STRIPE_SECRET_KEY: ${{ secrets.DEV_STRIPE_SECRET_KEY }}
+          IMPLANT_REGISTRATION_PRICE_ID: ${{ secrets.DEV_IMPLANT_REGISTRATION_PRICE_ID }}
+          PATIENT_VIEW_CHART_PRICE_ID: ${{ secrets.DEV_PATIENT_VIEW_CHART_PRICE_ID }}
+          S3_EXPORT_BUCKET_ROOT_PATH: ${{ secrets.DEV_S3_EXPORT_BUCKET_ROOT_PATH }}
+          S3_AUDIT_LOG_BACKUP_BUCKET: ${{ secrets.DEV_S3_AUDIT_LOG_BACKUP_BUCKET }}
           
           LAMBDA_SG_ID: $LAMBDA_SG_ID
           SUBNET_IDS:
@@ -461,7 +461,7 @@ jobs:
         run: terraform apply -auto-approve tfplan
 
 # ####################################################################
-# # INFRASTRUCTURE DESTRUCTION Only no sls (UNCOMMENT WHEN TEARING DOWN)
+# # INFRASTRUCTURE DESTRUCTION Only No Sereverless (UNCOMMENT WHEN TEARING DOWN)
 # ####################################################################
 # name: Destroy lumifi backend Infrastructure
 
