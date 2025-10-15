@@ -420,7 +420,6 @@ jobs:
           export SERVERLESS_LICENSE_KEY=${{ secrets.SERVERLESS_LICENSE_KEY }}
           sls remove --stage $ENVIRONMENT
 
-
   destroy-terraform:
     needs: destroy-serverless
     runs-on: ubuntu-latest
@@ -455,6 +454,7 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
+      - name: Terraform Plan (Destroy)
         run: terraform plan -destroy -out=tfplan -var="environment=${ENVIRONMENT}" -var="deploy_public_rds=true" -var="deploy_private_rds=false"
 
       - name: Terraform Destroy
