@@ -317,6 +317,27 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4.0.0
 
+      # ✅ NEW: Fetch VPC and DB outputs from Terraform
+      - name: Get Terraform Outputs for VPC & DB
+        working-directory: backend-infra
+        run: |
+          terraform init -reconfigure
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT
+          
+          DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint)
+          LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id)
+          SUBNET_IDS=$(terraform output -raw subnet_ids)
+          
+          DB_HOST=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 1)
+          DB_PORT=$(echo "$DB_ENDPOINT_FULL" | cut -d ':' -f 2)
+          
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_PORT=$DB_PORT" >> $GITHUB_ENV
+          echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
+          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
+
+          echo "Terraform outputs loaded successfully"
+
       - name: Retrieve Secrets from AWS Secrets Manager
         id: get-secrets
         run: |
