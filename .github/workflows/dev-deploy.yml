@@ -455,11 +455,10 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan (Destroy)
         run: terraform plan -destroy -out=tfplan -var="environment=${ENVIRONMENT}" -var="deploy_public_rds=true" -var="deploy_private_rds=false"
 
       - name: Terraform Destroy
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
 
 # ####################################################################
 # # INFRASTRUCTURE DESTRUCTION Only no sls (UNCOMMENT WHEN TEARING DOWN)
