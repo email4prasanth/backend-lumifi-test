@@ -202,73 +202,73 @@ functions:
           path: /${self:custom.env.API_ROOT_PATH}/notification/markAsRead
           method: POST
 
-  # practiceHandlerFunction:
-  #   timeout: 30 # Max 900 seconds (15 minutes)
-  #   handler: dist/handler.practiceHandler
-  #   events:
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/software
-  #         method: GET
+  practiceHandlerFunction:
+    timeout: 30 # Max 900 seconds (15 minutes)
+    handler: dist/handler.practiceHandler
+    events:
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/software
+          method: GET
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/speciality
-  #         method: GET
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/speciality
+          method: GET
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice
-  #         method: GET
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice
+          method: GET
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/register
-  #         method: POST
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/register
+          method: POST
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/update
-  #         method: PUT
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/update
+          method: PUT
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/accountAdminAvailability
-  #         method: GET
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/accountAdminAvailability
+          method: GET
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/ownerValidation
-  #         method: POST
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/ownerValidation
+          method: POST
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/deactivate
-  #         method: POST
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/deactivate
+          method: POST
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/practice/reactivate
-  #         method: POST
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/practice/reactivate
+          method: POST
 
-  # userHandlerFunction:
-  #   timeout: 30 # Max 900 seconds (15 minutes)
-  #   handler: dist/handler.userHandler
-  #   events:
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/user/role
-  #         method: GET
+  userHandlerFunction:
+    timeout: 30 # Max 900 seconds (15 minutes)
+    handler: dist/handler.userHandler
+    events:
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/user/role
+          method: GET
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/user/list
-  #         method: POST
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/user/list
+          method: POST
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/user/detail
-  #         method: GET
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/user/detail
+          method: GET
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/user/create
-  #         method: POST
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/user/create
+          method: POST
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/user/update
-  #         method: PUT
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/user/update
+          method: PUT
 
-  #     - httpApi:
-  #         path: /${self:custom.env.API_ROOT_PATH}/user/delete
-  #         method: DELETE
+      - httpApi:
+          path: /${self:custom.env.API_ROOT_PATH}/user/delete
+          method: DELETE
 
   # stateHandlerFunction:
   #   timeout: 30 # Max 900 seconds (15 minutes)
