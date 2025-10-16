@@ -2,5 +2,6 @@
 resource "random_password" "db_admin_password" {
   length           = 16
   special          = true
-  override_special = "!$%^&*()-_=+?"
+  # Excluded bash problematic charcters: $, !, ", ', \, `
+  override_special = "_+-=.@#^*?"
 }
