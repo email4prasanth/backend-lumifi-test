@@ -46,7 +46,7 @@ resource "aws_db_subnet_group" "private_db" {
 resource "aws_db_instance" "postgres_private" {
   count = var.deploy_private_rds ? 1 : 0
 
-  identifier        = "${terraform.workspace}-db-private"
+  identifier        = "${terraform.workspace}-${local.project_name.name}-db-private"
   allocated_storage = local.rds.allocated_storage
   storage_type      = "gp3"
   engine            = "postgres"
@@ -74,9 +74,12 @@ resource "aws_db_instance" "postgres_private" {
   backup_retention_period = 7
   deletion_protection     = false
   tags                    = local.tags
+  # depends_on = [
+  #   aws_nat_gateway.nat,
+  #   aws_route_table.private_rt,
+  #   aws_security_group.rds_private
+  # ]
   depends_on = [
-    aws_nat_gateway.nat,
-    aws_route_table.private_rt,
-    aws_security_group.rds_private
+    aws_db_subnet_group.private_db
   ]
 }

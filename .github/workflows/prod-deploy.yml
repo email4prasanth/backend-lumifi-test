@@ -68,9 +68,12 @@ jobs:
           echo "Lambda sg: $LAMBDA_SG_ID"
           echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> db_outputs.env
 
+          # SUBNET_IDS=$(terraform output -raw private_subnet_ids)
+          # echo "Subnet id: $SUBNET_IDS"
+          # echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
           SUBNET_IDS=$(terraform output -raw private_subnet_ids)
           echo "Subnet id: $SUBNET_IDS"
-          echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
+          echo "SUBNET_IDS=\"$SUBNET_IDS\"" >> db_outputs.env
 
       # Get and parse RDS endpoint seperate endpoint & port
       - name: Get and Parse RDS Endpoint
