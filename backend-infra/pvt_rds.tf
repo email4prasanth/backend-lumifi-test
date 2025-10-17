@@ -1,3 +1,10 @@
+# Fetch existing private subnets by tag name pattern
+data "aws_subnets" "existing_private" {
+  filter {
+    name   = "tag:Name"
+    values = ["${local.project_name.name}-private-subnet-*"]
+  }
+}
 # RDS Subnet Group (Using Private Subnets)
 resource "aws_db_subnet_group" "private_db" {
   count = var.deploy_private_rds ? 1 : 0
