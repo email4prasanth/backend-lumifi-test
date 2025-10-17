@@ -10,8 +10,9 @@ sudo apt install postgresql-client -y
 psql --version
 # check pvt rds connectivity
 nc -vz prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
-psql   -h prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com   -p 5432   -U dbadmin   -d prod_lumifi_private   -W
+psql -h prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com   -p 5432   -U dbadmin   -d prod_lumifi_private   -W
 Password: Fji0rR30mb-MOAn^
+\dt public.*
 \l
 \c prod_lumifi_private
 \dt
@@ -30,6 +31,7 @@ x6mTPvo_FH_y2Trw
 # List all schemas, all tables in the current database, View table data
 
 \dn
+\dt public.*
 \dt
 SELECT * FROM public.employees LIMIT 10;
 exit

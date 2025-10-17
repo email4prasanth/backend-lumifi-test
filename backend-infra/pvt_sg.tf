@@ -45,7 +45,9 @@
 
 #   tags = local.tags
 # }
+# ------------------------------
 # Private Lambda Security Group for Production
+# ------------------------------
 resource "aws_security_group" "lambda_private" {
   count = var.deploy_private_rds ? 1 : 0
 
@@ -75,13 +77,14 @@ resource "aws_security_group" "rds_private" {
   description = "Private RDS PostgreSQL access for production"
   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
-  # Allow PostgreSQL only from private Lambda security group
+  # Inbound: allow PostgreSQL from Lambda SG only
   ingress {
     description     = "Allow PostgreSQL access from private Lambda functions"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda_private[0].id]
+    # security_groups = [aws_security_group.lambda_private[0].id]
+    security_groups = var.deploy_private_rds ? [aws_security_group.lambda_private[0].id] : []
   }
 
   # Allow PostgreSQL from EC2 security group (for maintenance/access)
@@ -90,7 +93,8 @@ resource "aws_security_group" "rds_private" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.ec2[0].id]
+    # security_groups = [aws_security_group.ec2[0].id]
+    security_groups = var.deploy_private_rds ? [aws_security_group.ec2[0].id] : []
   }
 
   # Allow all outbound traffic
