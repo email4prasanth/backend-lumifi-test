@@ -76,8 +76,11 @@ output "public_route_table_name" {
 # ------------------------------
 # Private Subnets Outputs
 # ------------------------------
+# output "private_subnet_ids" {
+#   value = terraform.workspace == "dev" ? aws_subnet.lumifi_private_subnets[*].id : data.aws_subnets.private.ids
+# }
 output "private_subnet_ids" {
-  value = terraform.workspace == "dev" ? aws_subnet.lumifi_private_subnets[*].id : data.aws_subnets.private.ids
+  value = join(",", aws_subnet.lumifi_private_subnets[*].id)
 }
 
 output "private_subnet_names" {
