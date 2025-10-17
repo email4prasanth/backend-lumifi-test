@@ -15,7 +15,7 @@ resource "aws_db_subnet_group" "public_db" {
 resource "aws_db_instance" "postgres" {
   count = var.deploy_public_rds ? 1 : 0
 
-  identifier        = "${terraform.workspace}-lumifi-db"
+  identifier        = "${terraform.workspace}-${local.project_name.name}-db-pub"
   allocated_storage = local.rds.allocated_storage
   storage_type      = "gp3"
   engine            = "postgres"
