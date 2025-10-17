@@ -83,8 +83,8 @@ resource "aws_security_group" "rds_private" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    # security_groups = [aws_security_group.lambda_private[0].id]
-    security_groups = var.deploy_private_rds ? [aws_security_group.lambda_private[0].id] : []
+    security_groups = [aws_security_group.lambda_private[0].id]
+    # security_groups = var.deploy_private_rds ? [aws_security_group.lambda_private[0].id] : []
   }
 
   # Allow PostgreSQL from EC2 security group (for maintenance/access)
