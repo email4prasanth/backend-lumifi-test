@@ -68,7 +68,7 @@ jobs:
           echo "Lambda sg: $LAMBDA_SG_ID"
           echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> db_outputs.env
 
-          SUBNET_IDS=$(terraform output -raw subnet_ids)
+          SUBNET_IDS=$(terraform output -raw public_subnet_ids)
           echo "Subnet id: $SUBNET_IDS"
           echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
 
@@ -337,7 +337,7 @@ jobs:
 #         id: tf-outputs
 #         run: |
 #           LAMBDA_SG_ID=$(terraform output -raw lambda_sg_id 2>/dev/null || echo "sg-not-found")
-#           SUBNET_IDS=$(terraform output -raw subnet_ids 2>/dev/null || echo "subnet-not-found")
+#           SUBNET_IDS=$(terraform output -raw public_subnet_ids 2>/dev/null || echo "subnet-not-found")
 #           DB_ENDPOINT_FULL=$(terraform output -raw rds_endpoint 2>/dev/null || echo "db-not-found:5432")
           
 #           echo "LAMBDA_SG_ID=$LAMBDA_SG_ID" >> $GITHUB_ENV
