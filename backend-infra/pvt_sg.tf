@@ -79,7 +79,7 @@ resource "aws_security_group" "rds_private" {
 
   # Inbound: allow PostgreSQL from Private Lambda SG only
   ingress {
-    description     = "Enable private Lambda functions to access PostgreSQL database"
+    description     = "Allow PostgreSQL access from private Lambda functions"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
@@ -88,7 +88,7 @@ resource "aws_security_group" "rds_private" {
   }
   # Inbound: allow PostgreSQL from Lambda SG only
   ingress {
-    description     = "Enable lambda rds functions to access PostgreSQL database"
+    description     = "Allow PostgreSQL access from lambda rds functions"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
@@ -97,7 +97,7 @@ resource "aws_security_group" "rds_private" {
   }
   # Allow PostgreSQL from EC2 security group (for maintenance/access)
   ingress {
-    description     = "Enable EC2 instances to access PostgreSQL database"
+    description     = "Allow PostgreSQL access from EC2 instances"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
@@ -123,7 +123,7 @@ resource "aws_security_group" "rds_private" {
 resource "aws_security_group" "ec2" {
   count = var.deploy_private_rds ? 1 : 0
 
-  name        = "${local.project_name.name}-${terraform.workspace}-ec2-private"
+  name        = "${local.project_name.name}-${terraform.workspace}-ec2"
   description = "EC2 instance for accessing private RDS in production"
   vpc_id      = terraform.workspace == "prod" ? data.aws_vpc.existing[0].id : aws_vpc.lumifi-vpc[0].id
 
