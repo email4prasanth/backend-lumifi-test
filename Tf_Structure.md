@@ -48,3 +48,7 @@ aws secretsmanager delete-secret `
     --secret-id prod-lumifitest-rds-credentials-be-pvt `
     --force-delete-without-recovery `
     --region us-east-1
+
+- branch `feature/sls-dbconnect` is not connected to rds it contains both public and pvt subnets
+- check ammie, chatgpt ngix server
+https://chatgpt.com/c/68ef6e3c-8090-8323-8e12-02dcabae6b75
