@@ -71,10 +71,9 @@ jobs:
           # SUBNET_IDS=$(terraform output -raw private_subnet_ids)
           # echo "Subnet id: $SUBNET_IDS"
           # echo "SUBNET_IDS=$SUBNET_IDS" >> db_outputs.env
-          SUBNET_IDS=$(terraform output -json private_subnet_ids | jq -r 'join(",")')
+          SUBNET_IDS=$(terraform output -raw private_subnet_ids)
           echo "Subnet id: $SUBNET_IDS"
           echo "SUBNET_IDS=\"$SUBNET_IDS\"" >> db_outputs.env
-
 
       # Get and parse RDS endpoint seperate endpoint & port
       - name: Get and Parse RDS Endpoint
