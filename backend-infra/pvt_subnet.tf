@@ -73,17 +73,17 @@ data "aws_route_tables" "private" {
   }
 }
 
-data "aws_subnets" "private" {
-  count = terraform.workspace == "prod" ? 1 : 0
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.existing[0].id]
-  }
-  filter {
-    name   = "tag:Tier"
-    values = ["private"]
-  }
-}
+# data "aws_subnets" "private" {
+#   count = terraform.workspace == "prod" ? 1 : 0
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.existing[0].id]
+#   }
+#   filter {
+#     name   = "tag:Tier"
+#     values = ["private"]
+#   }
+# }
 # ------------------------------
 # Data Source for Existing NAT Gateway (Prod)
 # ------------------------------

@@ -1,19 +1,44 @@
-# Fetch existing private subnets by tag name pattern
-data "aws_subnets" "existing_private" {
+# Get the correct VPC dynamically
+data "aws_vpc" "selected" {
   filter {
     name   = "tag:Name"
-    values = ["${local.project_name.name}-private-subnet-*"]
+    values = ["${local.project_name.name}-vpc"]
   }
 }
+# Get private subnets dynamically (avoid hardcoding)
+data "aws_subnets" "private" {
+  # count = terraform.workspace == "prod" ? 1 : 0
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.selected.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*private*"] # will match lumifitest-private-subnet-1/2
+  }
+}
+# data "aws_subnets" "private" {
+#   count = terraform.workspace == "prod" ? 1 : 0
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.existing[0].id]
+#   }
+#   filter {
+#     name   = "tag:Tier"
+#     values = ["private"]
+#   }
+# }
 # RDS Subnet Group (Using Private Subnets)
 resource "aws_db_subnet_group" "private_db" {
   count = var.deploy_private_rds ? 1 : 0
 
-  name       = "${terraform.workspace}-${local.project_name.name}-private-db-subnet-group"
-  subnet_ids = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.private[0].ids
-
+  name        = "${terraform.workspace}-${local.project_name.name}-private-db-subnet-group"
+  subnet_ids  = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.private.ids
+  description = "Private DB subnet group for ${terraform.workspace} environment"
   tags = merge(local.tags, {
-    Name = "${terraform.workspace}-${local.project_name.name}-pvt-db-subnet-group"
+    Name        = "${terraform.workspace}-${local.project_name.name}-pvt-db-subnet-group"
+    Environment = terraform.workspace
   })
 }
 
