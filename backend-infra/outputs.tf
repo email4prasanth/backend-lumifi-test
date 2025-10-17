@@ -42,9 +42,13 @@ output "vpc_name" {
 # ------------------------------
 # Public Subnets Outputs
 # ------------------------------
+# output "public_subnet_ids" {
+#   value = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.public[0].ids
+# }
 output "public_subnet_ids" {
-  value = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.public[0].ids
+  value = join(",", aws_subnet.lumifi_subnets[*].id)
 }
+
 
 output "public_subnet_names" {
   value = terraform.workspace == "dev" ? [for s in aws_subnet.lumifi_subnets : s.tags["Name"]] : [for s in data.aws_subnets.public[0].ids : s]
