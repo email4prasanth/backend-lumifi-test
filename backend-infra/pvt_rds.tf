@@ -1,5 +1,6 @@
 # Get the correct VPC dynamically
 data "aws_vpc" "selected" {
+  count = terraform.workspace == "prod" ? 1 : 0
   filter {
     name   = "tag:Name"
     values = ["${local.project_name.name}-vpc"]
@@ -7,7 +8,7 @@ data "aws_vpc" "selected" {
 }
 # Get private subnets dynamically (avoid hardcoding)
 data "aws_subnets" "private" {
-  # count = terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "prod" ? 1 : 0
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.selected.id]
