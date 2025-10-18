@@ -97,10 +97,10 @@ resource "aws_security_group" "rds_private" {
   }
   # Allow PostgreSQL from EC2 security group (for maintenance/access)
   ingress {
-    description     = "Allow PostgreSQL access from EC2 instances"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
+    description = "Allow PostgreSQL access from EC2 instances"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
     # security_groups = [aws_security_group.ec2[0].id]
     security_groups = var.deploy_private_rds ? [aws_security_group.ec2[0].id] : []
   }
