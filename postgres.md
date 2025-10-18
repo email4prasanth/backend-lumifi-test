@@ -9,8 +9,8 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install postgresql-client -y
 psql --version
 # check pvt rds connectivity
-nc -vz prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
-psql -h prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com   -p 5432   -U dbadmin   -d prod_lumifi_private   -W
+nc -vz prod-lumifitest-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
+psql -h prod-lumifitest-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com   -p 5432   -U dbadmin   -d prod_lumifi_private   -W
 Password: Fji0rR30mb-MOAn^
 \dt public.*
 \l
@@ -20,9 +20,9 @@ Password: Fji0rR30mb-MOAn^
 ```
 # check the public rds connection
 ```sh
-nc -vz dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
+nc -vz dev-lumifitest-db-pub.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
 psql \
-  -h dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com \
+  -h dev-lumifitest-db-pub.cxkiky6us81t.us-east-1.rds.amazonaws.com \
   -p 5432 \
   -U dbadmin \
   -d dev_lumifi \
@@ -62,8 +62,8 @@ exit
 ```
 - Check the reflections
 ```sh
-nc -vz prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
-psql   -h prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com   -p 5432   -U dbadmin   -d prod_lumifi_private   -W
+nc -vz prod-lumifitest-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com 5432
+psql   -h prod-lumifitest-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com   -p 5432   -U dbadmin   -d prod_lumifi_private   -W
 Password: 
 \l
 \dt
