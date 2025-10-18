@@ -1,5 +1,6 @@
 # Get the correct VPC dynamically
 data "aws_vpc" "selected" {
+  count = terraform.workspace == "prod" ? 1 : 0
   filter {
     name   = "tag:Name"
     values = ["${local.project_name.name}-vpc"]
@@ -7,10 +8,10 @@ data "aws_vpc" "selected" {
 }
 # Get private subnets dynamically (avoid hardcoding)
 data "aws_subnets" "private" {
-  # count = terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "prod" ? 1 : 0
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.selected.id]
+    values = [data.aws_vpc.selected[0].id]
   }
 
   filter {
@@ -34,7 +35,7 @@ resource "aws_db_subnet_group" "private_db" {
   count = var.deploy_private_rds ? 1 : 0
 
   name        = "${terraform.workspace}-${local.project_name.name}-private-db-subnet-group"
-  subnet_ids  = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.private.ids
+  subnet_ids  = terraform.workspace == "dev" ? aws_subnet.lumifi_subnets[*].id : data.aws_subnets.private[0].ids
   description = "Private DB subnet group for ${terraform.workspace} environment"
   tags = merge(local.tags, {
     Name        = "${terraform.workspace}-${local.project_name.name}-pvt-db-subnet-group"
