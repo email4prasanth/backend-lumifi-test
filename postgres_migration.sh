@@ -5,17 +5,17 @@ set -euo pipefail
 # CONFIGURATION
 # -----------------------------
 # Source (dev) RDS
-SRC_HOST="dev-lumifi-db.cxkiky6us81t.us-east-1.rds.amazonaws.com"
+SRC_HOST="dev-lumifitest-db-pub.cxkiky6us81t.us-east-1.rds.amazonaws.com"
 SRC_DB="dev_lumifi"
 SRC_USER="dbadmin"
-SRC_PASS="x6mTPvo_FH_y2Trw"
+SRC_PASS="knC-aldJc?T2T12a"
 SRC_PORT=5432
 
 # Target (prod) RDS
-TGT_HOST="prod-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com"
+TGT_HOST="prod-lumifitest-db-private.cxkiky6us81t.us-east-1.rds.amazonaws.com"
 TGT_DB="prod_lumifi_private"
 TGT_USER="dbadmin"
-TGT_PASS="Fji0rR30mb-MOAn^"
+TGT_PASS="RRKZsooUpfyFkTbv"
 TGT_PORT=5432
 
 # Dump file location
